@@ -131,6 +131,10 @@ class Room(object):
     def get_current_user_names(self):
         return self._client._br.get_current_user_names_in_room(self.id)
 
+    def __repr__(self):
+        return "<%s.%s with id %r on %s>" % (
+            type(self).__module__, type(self).__name__, self.id, self._client.host)
+
 
 class FilteredEventIterator(object):
     def __init__(self, room, types):

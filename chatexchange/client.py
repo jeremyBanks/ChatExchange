@@ -98,7 +98,7 @@ class Client(object):
     def get_user(self, user_id, **attrs_to_set):
         """
         Returns the User instance with the given room_id.
-        Any keyword arguments will be assigned as attributes of the Room.
+        Any keyword arguments will be assigned as attributes of the User.
 
         @rtype: L{users.User}
         """

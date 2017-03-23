@@ -1,49 +1,87 @@
 #!/usr/bin/env bpython -i
-import getpass
-import logging
-import os
-import sys
+import logging, sys
+sys.stderr.write(">>> import logging, sys\n")
 
+sys.stderr.write(">>> from itertools import ifilter, islice, imap, tee, takewhile\n")
+sys.stderr.write("\n")
+from itertools import ifilter, islice, imap, tee, takewhile
+sys.stderr.write(">>> import chatexchange\n")
 import chatexchange
 
+sys.stderr.write("%r\n" % (chatexchange))
+sys.stderr.write("\n")
 
+sys.stderr.write(">>> logging.basicConfig(level=logging.WARNING)\n")
 logging.basicConfig(level=logging.WARNING)
+sys.stderr.write("\n")
 
-sys.stderr.write("chatexchange == %r\n" % (chatexchange))
+def get_client():
+    import getpass, os
 
-host = 'stackexchange.com'
-sys.stderr.write("host == %r\n" % (host))
+    host = 'stackexchange.com'
 
-if 'ChatExchangeU' in os.environ:
-    email = os.environ['ChatExchangeU']
-    sys.stderr.write("# using email from $ChatExchangeU\n")
-else:
-    sys.stderr.write("# email: ")
-    sys.stderr.flush()
-    email = sys.stdin.readline()
-
-if email:
-    if 'ChatExchangeP' in os.environ:
-        password = os.environ['ChatExchangeP']
-        sys.stderr.write("# using password from $ChatExchangeP\n")
+    if 'ChatExchangeU' in os.environ:
+        email = os.environ['ChatExchangeU']
+        if email:
+            sys.stderr.write("# using email from $ChatExchangeU\n")
     else:
-        sys.stderr.write("# password: ")
+        sys.stderr.write("# email (optional): ")
         sys.stderr.flush()
-        password = getpass.getpass()
-else:
-    sys.stderr.write("# continuing without authentication")
+        email = sys.stdin.readline()[:-1]
 
-if email:
-    chat = chatexchange.Client(host, email, password)
-else:
-    chat = chatexchange.Client(host)
-sys.stderr.write("chat == %r\n" % (chat))
+    if email:
+        if 'ChatExchangeP' in os.environ:
+            password = os.environ['ChatExchangeP']
+            sys.stderr.write("# using password from $ChatExchangeP\n")
+        else:
+            password = getpass.getpass("# password: ")
+    else:
+        sys.stderr.write("# continuing without authentication\n")
 
+    if email:
+        sys.stderr.write(">>> chat = chatexchange.Client(%r, email=..., password=...)\n" % (host))
+        return chatexchange.Client(host, email, password)
+    else:
+        sys.stderr.write(">>> chat = chatexchange.Client(%r)\n" % (host))
+        return chatexchange.Client(host)
+chat = get_client()
+del get_client
+
+sys.stderr.write("%r\n" % (chat))
+sys.stderr.write("\n")
+
+sys.stderr.write(">>> sandbox = chat.get_room(1)\n")
 sandbox = chat.get_room(1)
-sys.stderr.write("sandbox == %r\n" % (sandbox))
+sys.stderr.write("%r\n" % (sandbox))
+sys.stderr.write(">>> sandbox.name\n%r\n" % (sandbox.name))
+sys.stderr.write("\n")
 
-me = chat.get_me()
-sys.stderr.write("me == %r\n" % (me))
-sys.stderr.write("me.name == %r\n" % (me.name))
+if chat.logged_in:
+    sys.stderr.write(">>> somebody = chat.get_me(-2)\n")
+    somebody = chat.get_me()
+else:
+    sys.stderr.write(">>> somebody = chat.get_user(-2)\n")
+    somebody = chat.get_user(-2)
+
+sys.stderr.write("%r\n" % (somebody))
+sys.stderr.write(">>> somebody.name\n%r\n" % (somebody.name))
+sys.stderr.write("\n")
+
+sys.stderr.write(">>> greeting = chat.get_message(15356352)\n")
+greeting = chat.get_message(15356352)
+sys.stderr.write("%r\n" % (greeting))
+sys.stderr.write(">>> greeting.text_content\n%r\n" % (greeting.text_content))
+sys.stderr.write("\n")
+
+sys.stderr.write("""# print next message in room:
+#
+#     for message in islice(sandbox.new_messages(), 1):
+#         print("{0.owner.name}: {0.text_content}".format(message))
+
+# print next five users to enter the room:
+#
+#     for event in islice(sandbox.new_events(chatexchange.events.UserEntered), 5):
+#         print("{0.user.name} entered {1}.".format(event, sandbox.name))
+#\n""")
 
 sys.stderr.write("\n")

@@ -204,3 +204,7 @@ class Message(object):
             self.pinners = []
         else:
             self._logger.info(".stars is already 0")
+
+    def __repr__(self):
+        return "<%s.%s with id %r on %s>" % (
+            type(self).__module__, type(self).__name__, self.id, self._client.host)
