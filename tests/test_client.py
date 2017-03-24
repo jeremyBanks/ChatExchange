@@ -27,15 +27,15 @@ TEST_ROOMS = [
 ]
 
 
-if (os.environ.get('TRAVIS_BUILD_ID') and
+if (os.environ.get('TRAVIS_JOB_ID') and
     os.environ.get('TRAVIS_REPO_SLUG') and
-    os.environ.get('TRAVIS_COMMIT')):
+    os.environ.get('TRAVIS_COMMIT') and
+    os.environ.get('TRAVIS_PYTHON_VERSION')):
     TEST_MESSAGE_FORMAT = (
-        "[ [ChatExchange@Travis](https://travis-ci.org/"
-        "{0[TRAVIS_REPO_SLUG]}/builds/{0[TRAVIS_BUILD_ID]} \"This is "
-        "a test message for ChatExchange using the nonce {{0}}.\") ] "
-        "This is a test of [{0[TRAVIS_REPO_SLUG]}@{short_commit}]("
-        "https://github.com/{0[TRAVIS_REPO_SLUG]}/commit/{0[TRAVIS_COMMIT]})."
+        "[ [GitHub/{0[TRAVIS_REPO_SLUG]}#{0[TRAVIS_BRANCH]}@{short_commit}]("
+        "https://github.com/{0[TRAVIS_REPO_SLUG]}/commit/{0[TRAVIS_COMMIT]} \"nonce={{0}}.\") ] "
+        "Running [tests for Python {0[TRAVIS_PYTHON_VERSION]}]("
+        "https://travis-ci.org/{0[TRAVIS_REPO_SLUG]}/jobs/{0[TRAVIS_JOB_ID]})."
     ).format(os.environ, short_commit=os.environ['TRAVIS_COMMIT'][:8])
 elif (os.environ.get('CI_PROJECT_URL') and
     os.environ.get('CI_JOB_ID') and
@@ -44,15 +44,13 @@ elif (os.environ.get('CI_PROJECT_URL') and
     os.environ.get('CI_JOB_NAME')):
     TEST_MESSAGE_FORMAT = (
         "[ [GitLab/{0[CI_PROJECT_PATH]}#{0[CI_COMMIT_REF_NAME]}@{short_commit}]("
-        "{0[CI_PROJECT_URL]}/commit/{0[CI_COMMIT_SHA]}) ] "
-        "Running [`{0[CI_JOB_NAME]}`]({0[CI_PROJECT_URL]}/builds/{0[CI_JOB_ID]} \"This is "
-        "a test message for ChatExchange using the nonce {{0}}.\")."
+        "{0[CI_PROJECT_URL]}/commit/{0[CI_COMMIT_SHA]} \"nonce={{0}}\") ] "
+        "Running [`{0[CI_JOB_NAME]}`]({0[CI_PROJECT_URL]}/builds/{0[CI_JOB_ID]})."
     ).format(os.environ, short_commit=os.environ['CI_COMMIT_SHA'][:8])
 else:
     TEST_MESSAGE_FORMAT = (
-        "[ [ChatExchange@localhost](https://github.com/Manishearth/"
-        "ChatExchange/ \"This is a test message for ChatExchange using "
-        "the nonce {0}.\") ] This is a test message for ChatExchange.")
+        "[ [ChatExchange](https://github.com/Manishearth/ChatExchange/ \"nonce={0}.\")"
+        " ] Running tests.")
 
 
 if live_testing.enabled:
