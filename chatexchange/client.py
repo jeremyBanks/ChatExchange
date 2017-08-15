@@ -58,6 +58,8 @@ class Client(object):
         if host not in self.valid_hosts:
             raise ValueError("invalid host: %r" % (host,))
 
+        host = 'local.mse.com' ## TODO: remove me
+
         self.host = host
         self.logged_in = False
         self.on_message_sent = None

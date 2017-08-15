@@ -19,13 +19,26 @@ class Room(object):
         self._logger = logger.getChild('Room')
         self._client = client
 
-    name = _utils.LazyFrom('scrape_info')
-    description = _utils.LazyFrom('scrape_info')
+    name = _utils.LazyFrom('fetch_from_api')
+    description = _utils.LazyFrom('fetch_from_api')
+    owners = _utils.LazyFrom('fetch_from_api')
+
     message_count = _utils.LazyFrom('scrape_info')
     user_count = _utils.LazyFrom('scrape_info')
     parent_site_name = _utils.LazyFrom('scrape_info')
-    owners = _utils.LazyFrom('scrape_info')
     tags = _utils.LazyFrom('scrape_info')
+
+    def fetch_from_api(self):
+        data = self._client._br.get_room_from_api(self.id)
+
+        self.name = data['name']
+        self.description = data['description']
+        self.owners = [
+            self._client.get_user(
+                id = owner['user_id'],
+                display_name = owner['display_name']
+            ) for owner in data['owners']
+        ]
 
     def scrape_info(self):
         data = self._client._br.get_room_info(self.id)

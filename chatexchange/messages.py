@@ -12,21 +12,43 @@ class Message(object):
         self._logger = logger.getChild('Message')
         self._client = client
 
-    room = _utils.LazyFrom('scrape_transcript')
-    content = _utils.LazyFrom('scrape_transcript')
-    owner = _utils.LazyFrom('scrape_transcript')
-    _parent_message_id = _utils.LazyFrom('scrape_transcript')
+    room = _utils.LazyFrom('fetch_from_api')
+    owner = _utils.LazyFrom('fetch_from_api')
+    content = _utils.LazyFrom('fetch_from_api')
+    content_source = _utils.LazyFrom('fetch_from_api')
+    _parent_message_id = _utils.LazyFrom('fetch_from_api')
+    pinned = _utils.LazyFrom('fetch_from_api')
+    time_stamp = _utils.LazyFrom('fetch_from_api')
+
     stars = _utils.LazyFrom('scrape_transcript')
     starred_by_you = _utils.LazyFrom('scrape_transcript')
-    pinned = _utils.LazyFrom('scrape_transcript')
 
-    content_source = _utils.LazyFrom('scrape_history')
     editor = _utils.LazyFrom('scrape_history')
     edited = _utils.LazyFrom('scrape_history')
     edits = _utils.LazyFrom('scrape_history')
     pins = _utils.LazyFrom('scrape_history')
     pinners = _utils.LazyFrom('scrape_history')
-    time_stamp = _utils.LazyFrom('scrape_history')
+
+    def fetch_from_api(self):
+        data = self._client._br.get_message_from_api(self.id)
+
+        if data['owner'] is not None:
+            self.owner = self._client.get_user(
+                id = data['owner']['user_name'],
+                display_name = data['owner']['display_name']
+            )
+        else:
+            self.owner = None
+        
+        self.room = self._client.get_room(
+            id = data['room']['room_id'],
+            name = data['room']['display_name'],
+        )
+        self.content = data['body']
+        self.content_source = data['body_markdown']
+        self.parent_message_id = data['parent_message_id']
+        self.pinned = data['is_pinned']
+        self.time_stamp = data['creation_date']
 
     def scrape_history(self):
         data = self._client._br.get_history(self.id)

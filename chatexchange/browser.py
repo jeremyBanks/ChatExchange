@@ -23,7 +23,7 @@ class Browser(object):
     """
     An interface for scraping and making requests to Stack Exchange chat.
     """
-    user_agent = ('ChatExchange/0.dev '
+    user_agent = ('ChatExchange/0.0.4 '
                   '(+https://github.com/Manishearth/ChatExchange)')
 
     chat_fkey = _utils.LazyFrom('_update_chat_fkey_and_user')
@@ -35,6 +35,7 @@ class Browser(object):
     def __init__(self):
         self.logger = logger.getChild('Browser')
         self.session = requests.Session()
+        self.session.verify = False ## TODO: remove me
         self.session.headers.update({
             'User-Agent': self.user_agent
         })
@@ -666,6 +667,28 @@ class Browser(object):
         for s in self.sockets:
             s.on_websocket_closed = self.on_websocket_closed
 
+    # Official API Integration
+
+    API_ROOT = 'api/0.1-dev/'
+
+    def _get_from_api(self, path):
+        try:
+            return self.get(self.API_ROOT + path).json()
+        except requests.exceptions.HTTPError as ex:
+            if ex.response.status_code == 400:
+                error_message = ex.response.json()['error_message']
+                raise StackExchangeChatAPIError(error_message)
+            else:
+                raise
+
+    def get_user_from_api(self, user_id):
+        return self._get_from_api('users/%s' % user_id)
+    
+    def get_room_from_api(self, room_id):
+        return self._get_from_api('rooms/%s' % room_id)
+    
+    def get_message_from_api(self, message_id):
+        return self._get_from_api('messages/%s' % message_id)
 
 class RoomSocketWatcher(object):
     def __init__(self, browser, room_id, on_activity):
@@ -758,4 +781,8 @@ class BrowserError(Exception):
 
 
 class LoginError(BrowserError):
+    pass
+
+
+class StackExchangeChatAPIError(BrowserError):
     pass
