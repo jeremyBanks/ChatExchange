@@ -1,8 +1,11 @@
+from .room_messages import RoomMessages
+
+
 def test():
-    assert EXAMPLE_DATA
+    assert RoomMessages(EXAMPLE_DATA)
 
 
-EXAMPLE_DATA = '''{"events":[
+EXAMPLE_DATA = r'''{"events":[
 {"event_type":1,"time_stamp":1511353847,"content":"tpu- by suraj on \u003ca href=\"//askubuntu.com/questions/979130\"\u003ehttp://tophealthydiet.com/protesto-virility/\u003c/a\u003e \u0026#91;\u003ca href=\"http://metasmoke.erwaysoftware.com/post/94658\" rel=\"nofollow noopener noreferrer\"\u003eMS\u003c/a\u003e]","user_id":120914,"user_name":"SmokeDetector","room_id":11540,"message_id":41294188},
 {"event_type":1,"time_stamp":1511353858,"content":"tpu- by suraj","user_id":120914,"user_name":"SmokeDetector","room_id":11540,"message_id":41294190},
 {"event_type":1,"time_stamp":1511353911,"content":"[ \u003ca href=\"//goo.gl/eLDYqh\" rel=\"nofollow noopener noreferrer\"\u003eSmokeDetector\u003c/a\u003e | \u003ca href=\"//m.erwaysoftware.com/posts/by-url?url=//superuser.com/questions/1270782\" rel=\"nofollow noopener noreferrer\"\u003eMS\u003c/a\u003e ] Link at end of body: \u003ca href=\"//superuser.com/questions/1270782\"\u003eHTTP Post request transfer to Trello request LUA\u003c/a\u003e by \u003ca href=\"//superuser.com/users/823128\"\u003eSomeoneIsHere...Watching\u003c/a\u003e on \u003ccode\u003esuperuser.com\u003c/code\u003e","user_id":120914,"user_name":"SmokeDetector","room_id":11540,"message_id":41294202},
