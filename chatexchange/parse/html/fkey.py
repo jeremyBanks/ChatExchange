@@ -18,4 +18,4 @@ class FKey(ParseHTML):
         super().__init__(page)
 
         fkey_el ,= self._dom.cssselect('input[name=fkey]')
-        self.fkey = fkey_el['value']
+        self.fkey = fkey_el.get('value')

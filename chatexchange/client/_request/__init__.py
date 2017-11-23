@@ -29,7 +29,7 @@ class _Request:
     async def request(cls, client, server, **kwargs):
         self = cls(client, server, **kwargs)
         logger.info("requesting %s...", self.url)
-        self.html = await self._request()
+        self._text = await self._request()
         logger.debug("Importing data requested from %s...", self.url)
         self._load()
         logger.info("...finished scraping %s.", self.url)
@@ -53,9 +53,9 @@ class _Request:
 
         async with request as response:
             logger.debug("...%s response from %s...", response.status, self.url)
-            html = await response.text()
+            text = await response.text()
             logger.debug("...fully loaded")
-            return html
+            return text
 
 
 
@@ -66,7 +66,7 @@ class StackOpenIDFKey(_Request):
         return 'account/login'
 
     def _load(self):
-        self.data = parse.FKey(self.html)
+        self.data = parse.FKey(self._text)
 
         self.fkey = self.data.fkey
 
@@ -77,7 +77,7 @@ class StackChatFKey(_Request):
         return ''
 
     def _load(self):
-        self.data = parse.FKey(self.html)
+        self.data = parse.FKey(self._text)
 
         self.fkey = self.data.fkey
 
@@ -89,7 +89,37 @@ class RoomMessages(_Request):
             self,
             room_id,
             before_message_id=None):
-        return '/chats/%s/events?before=%s&mode=Messages&msgCount=100' % (room_id, before_message_id or '')
+        self._room_id = room_id
+        return 'chats/%s/events?before=%s&mode=Messages&msgCount=100' % (room_id, before_message_id or '')
+
+    def _load(self):
+        self.data = parse.RoomMessages(self._text)
+
+        logger.debug("Inserting RoomMessages data.")
+        
+        with self._client.sql_session() as sql:
+            self.room = self._server._get_or_create_room(sql, self._room_id)
+            self.messages = []
+
+            for m in self.data._data['events']:
+                if m['event_type'] == 1:
+                    message = self._server._get_or_create_message(sql, m['message_id'])
+                    message.mark_updated()
+
+                    message.room_meta_id = self.room.meta_id
+                    message.content_html = m.get('content', '')
+                    message.parent_message_id = m.get('parent_message_id')
+                    if message.parent_message_id:
+                        parent = self._server._get_or_create_message(sql, message.parent_message_id)
+
+                    if m['user_id']:
+                        owner = self._server._get_or_create_user(sql, m['user_id'])
+                        owner.mark_updated()
+
+                        owner.user_name = m['user_name']
+                        message.owner_meta_id = owner.meta_id
+                    
+                    self.messages.append(message)
 
 
 
@@ -127,9 +157,9 @@ class TranscriptDay(_Request):
         return path
 
     def _load(self):
-        self.data = parse.TranscriptDay(self.html)
+        self.data = parse.TranscriptDay(self._text)
 
-        logger.debug("Inserting data into database.")
+        logger.debug("Inserting TranscriptDay data.")
 
         with self._client.sql_session() as sql:
             self.room = self._server._get_or_create_room(sql, self.data.room_id)
@@ -171,8 +201,6 @@ class TranscriptDay(_Request):
                     self.users[m.owner_user_id] = owner
                 message.owner_meta_id = owner.meta_id
 
-        return self
-
 
 class UserInfo(_Request):
     def _make_path(
@@ -181,6 +209,8 @@ class UserInfo(_Request):
             rooms='current' or 'frequent'):
         return '/users/%s?tab=general&rooms=%s' % (user_id, rooms)
 
+    _load = NotImplemented
+
 
 class UserRecent(_Request):
     def _make_path(
@@ -188,6 +218,8 @@ class UserRecent(_Request):
             user_id,
             page=1 or int()):
         return '/users/%s?tab=recent&page=%s' % (user_id, page)
+
+    _load = NotImplemented
 
 
 class UserList(_Request):
@@ -199,6 +231,8 @@ class UserList(_Request):
             page=1):
         return '/users?tab=%s&sort=%s&filter=%s&pageSize=100&page=%s' % (tab, sort, filter, page)
 
+    _load = NotImplemented
+
 
 class RoomInfo(_Request):
     def _make_path(
@@ -207,12 +241,16 @@ class RoomInfo(_Request):
             users='current' or 'frequent'):
         return '/rooms/info/%s?tab=general&users=%s' % (room_id, users)
 
+    _load = NotImplemented
+
 
 class RoomAccess(_Request):
     def _make_path(
             self,
             room_id):
         return '/rooms/info/%s?tab=access' % (room_id,)
+
+    _load = NotImplemented
 
 
 class RoomList(_Request):
@@ -225,6 +263,8 @@ class RoomList(_Request):
             nohide=True):
         return '/users?tab=%s&sort=%s&filter=%s&pageSize=100&page=%s&nohide=%s' % (tab, sort, filter, page, nohide)
 
+    _load = NotImplemented
+
 
 class MessageSearch(_Request):
     def _make_path(
@@ -235,3 +275,5 @@ class MessageSearch(_Request):
             user_id='',
             page=1):
         return '/search?q=%s&Room=%s&User=%s&page=%s&pagesize=100&sort=%s' % (query, room_id, user_id, page, sort)
+
+    _load = NotImplemented

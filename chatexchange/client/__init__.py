@@ -130,7 +130,7 @@ class Client:
                 (models.Server.host == slug_or_host)).one()
         server.set(
             _client=self,
-            _fkey_request=_request.StackChatFKey(self, server))
+            _fkey_request=_request.StackChatFKey.request(self, server))
         return server
 
     @property

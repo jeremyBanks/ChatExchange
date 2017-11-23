@@ -12,6 +12,16 @@ async def main():
         server = chat.server(server_slug)
         room = await server.room(room_id)
 
+        from chatexchange.client._request import RoomMessages
+        response = await RoomMessages.request(
+            chat,
+            server,
+            room_id=room.room_id)
+
+        print(response.messages)
+
+        return
+
         print(room.name)
         n = 0
         async for m in room.old_messages():
