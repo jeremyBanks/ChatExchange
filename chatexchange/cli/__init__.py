@@ -18,7 +18,7 @@ def main():
         subcommand, *subcommand_args = args
         command_module = importlib.import_module('.' + subcommand, 'chatexchange.cli')
         c = command_module.main(*subcommand_args)
-        return asyncio.get_event_loop().run_until_complete(c)
+        asyncio.get_event_loop().run_until_complete(c)
     else:
         sys.stderr.write("usage: %s $subcommand [$args...]\n" % (command))
         sys.exit(1)

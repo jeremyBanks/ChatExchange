@@ -7,7 +7,7 @@ class Throttle:
         self.interval = interval
         self._queue = collections.deque()
         self._loop = asyncio.get_event_loop()
-        self._queue_runner = self._loop.create_task(self._run_queue)
+        self._queue_runner = self._loop.create_task(self._run_queue())
         self._next_awakening = self._loop.create_future()
 
     async def _run_queue(self):

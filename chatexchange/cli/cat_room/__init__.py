@@ -10,6 +10,8 @@ async def main():
 
     with chatexchange.Client() as chat:
         server = chat.server(server_slug)
-        room = server.room(room_id)
+        room = await server.room(room_id)
 
         print(room)
+
+    return

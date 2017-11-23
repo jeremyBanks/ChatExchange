@@ -32,6 +32,8 @@ async def main():
                 pass
 
             await report_most_replied(chat, room.server, room)
+    
+    return
 
 
 async def report_most_replied(chat, server, room):
