@@ -1,4 +1,4 @@
 pip install pipenv -q
 pipenv install --dev
 
-pipenv run pytest -v
+pipenv run python -m pytest -v
