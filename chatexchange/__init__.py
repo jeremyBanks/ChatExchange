@@ -1,2 +1,2 @@
-from . import util, data, client
+from . import util, data, parse, client
 from .client import Client
