@@ -1,11 +1,11 @@
 import datetime
 
-from ..util import _obj_dict
+from .._util import obj_dict
 
 
 
 class Parse:
-    __repr__ = _obj_dict.repr
+    __repr__ = obj_dict.repr
 
     @staticmethod
     def _parse_age_ago(text):

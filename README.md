@@ -191,7 +191,7 @@ Here's most of the API:
     - .scraper # classes interpreting specific HTML pages as structured data
         - .TranscriptDay
 
-    - ._obj_dict
+    - .obj_dict
         - .update(o, **attrs) # a generic __init__ asserting named attributes already exist 
         - .updated(o, **attrs) # chainable version of .update()
         - .repr(o) -> # a generic __repr__() useful for debugging

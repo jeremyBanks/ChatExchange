@@ -8,8 +8,8 @@ import aiohttp
 import sqlalchemy.orm
 
 from ..data import models, _seed
-from ..util import _async
-from . import request
+from .._util import async
+from . import _request
 
 
 
@@ -59,7 +59,7 @@ class Client:
         if db_path.startswith('sqlite:'):
             self._prepare_sqlite_hacks()
         
-        self._request_throttle = _async.Throttle(interval=0.5)
+        self._request_throttle = async.Throttle(interval=0.5)
 
         models.Base.metadata.create_all(self.sql_engine)
 
@@ -203,7 +203,7 @@ class Server(models.Server):
 
         if not self._client.offline:
             await self._client._request_throttle.turn()
-            transcript = await request.TranscriptDay.fetch(self, room_id=room_id)
+            transcript = await _request.TranscriptDay.fetch(self, room_id=room_id)
             room = transcript.room
 
         if room.meta_update_age <= self._client.required_max_age:
@@ -236,7 +236,7 @@ class Server(models.Server):
 
         if not self._client.offline:
             await self._server._client._request_throttle.turn()
-            transcript = await request.TranscriptDay.fetch(self, message_id=message_id)
+            transcript = await _request.TranscriptDay.fetch(self, message_id=message_id)
 
             message = transcript.messages[message_id]
 
@@ -268,7 +268,7 @@ class Room(models.Room):
 
     async def old_messages(self, from_date=None):
         await self._server._client._request_throttle.turn()
-        transcript = await request.TranscriptDay.fetch(
+        transcript = await _request.TranscriptDay.fetch(
             self._server, room_id=self.room_id,
             date=from_date)
 
@@ -281,7 +281,7 @@ class Room(models.Room):
             previous_day = transcript.data.previous_day or transcript.data.first_day
             if previous_day:
                 await self._server._client._request_throttle.turn()
-                transcript = await request.TranscriptDay.fetch(
+                transcript = await _request.TranscriptDay.fetch(
                     self._server, room_id=self.room_id, date=previous_day)
             else:
                 break

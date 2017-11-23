@@ -2,7 +2,7 @@ import abc
 import logging
 
 from ... import parse
-from ...util import _obj_dict
+from ..._util import obj_dict
 
 
 
@@ -20,7 +20,7 @@ class _Request:
     def _load(self):
         pass
 
-    __repr__ = _obj_dict.repr
+    __repr__ = obj_dict.repr
 
     @classmethod
     async def fetch(cls, server, **kwargs):

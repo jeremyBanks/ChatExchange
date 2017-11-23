@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def _monkeypatch_html5lib():
-    html = '''&#1;&#0;<b &#1;&#0;>&#1;&#0;</b>&#1;&#0;'''
+    html = '''&#1;&#0;<b>&#1;&#0;</b>&#1;&#0;'''
     # there is no acceptable way to hook into attribute values to ensure they're legal, as in:
     # html = '''&#1;&#0;<b &#1;&#0; id="&#1;&#0;">&#1;&#0;</b>&#1;&#0;'''
 

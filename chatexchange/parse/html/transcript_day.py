@@ -1,25 +1,12 @@
 import datetime
 import logging
 
-from ...util import _obj_dict
+from ..._util import obj_dict
 
 from ._base import ParseHTML
 
 
 logger = logging.getLogger(__name__)
-
-
-class Message:
-    def __init__(self):
-        self.id = None
-        self.content_html = None
-        self.content_text = None
-        self.owner_user_id = None
-        self.owner_user_name = None
-        self.edited = None
-        self.parent_message_id = None
-
-    __repr__ = _obj_dict.repr
 
 
 class TranscriptDay(ParseHTML):
@@ -93,3 +80,16 @@ class TranscriptDay(ParseHTML):
                     message.parent_message_id = None
 
                 self.messages.append(message)
+
+
+class Message:
+    def __init__(self):
+        self.id = None
+        self.content_html = None
+        self.content_text = None
+        self.owner_user_id = None
+        self.owner_user_name = None
+        self.edited = None
+        self.parent_message_id = None
+
+    __repr__ = obj_dict.repr
