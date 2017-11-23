@@ -11,20 +11,21 @@ logger = logging.getLogger(__name__)
 
 class _Request:
     method = 'GET' or 'POST'
+    host = None # default to server host
 
     @abc.abstractmethod
     def _make_path(self, **kwargs):
-        pass
+        "generates the full HTTP request path"
 
     @abc.abstractmethod
     def _load(self):
-        pass
+        "loads response data into this object, and possibly also into the client db"
 
     __repr__ = obj_dict.repr
 
     @classmethod
-    async def fetch(cls, server, **kwargs):
-        self = cls(server, **kwargs)
+    async def fetch(cls, client, **kwargs):
+        self = cls(client, **kwargs)
         logger.info("Fetching %s...", self.url)
         self.html = await self._fetch()
         logger.debug("Importing data fetched from %s...", self.url)
@@ -32,17 +33,17 @@ class _Request:
         logger.info("...finished scraping %s.", self.url)
         return self
 
-    def __init__(self, server, **kwargs):
-        self.server = server
-        self.url = 'https://%s/%s' % (server.host, self._make_path(**kwargs))
+    def __init__(self, client, **kwargs):
+        self._client = client
+        self.url = 'https://%s/%s' % (self.host or kwargs.pop('host'), self._make_path(**kwargs))
 
     async def _fetch(self):
         if self.method == 'GET':
-            request = self.server._client._web_session.get(self.url)
+            request = self._client._web_session.get(self.url)
         elif self.method == 'POST':
-            fkey = await self.server._client._fkey
+            fkey = await self._client._fkey
             # TODO add that fkey!
-            request = self.server._client._web_session.post(self.url)
+            request = self._client._web_session.post(self.url)
         else:
             raise ValueError('invalid .method')
 
@@ -53,6 +54,28 @@ class _Request:
             return html
 
 
+
+class StackOpenIDFKey(_Request):
+    host = 'openid.stackexchange.com'
+
+    def _make_path(self):
+        return 'account/login'
+
+    def _load(self):
+        self.data = parse.FKey(self.html)
+
+        self.fkey = self.data.fkey
+
+
+
+class StackChatFKey(_Request):
+    def _make_path(self):
+        return ''
+
+    def _load(self):
+        self.data = parse.FKey(self.html)
+
+        self.fkey = self.data.fkey
 
 
 class RoomMessages(_Request):
