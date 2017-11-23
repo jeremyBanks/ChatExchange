@@ -2,4 +2,4 @@ image: python:3
 
 test:
   script:
-  - ./test.cmd
+  - source test.cmd
