@@ -54,7 +54,7 @@ coverage.xml
 docs/_build/
 
 # epydoc output
-html/
+/html/
 epydocs/
 
 # IntelliJ IDEA Project Files
