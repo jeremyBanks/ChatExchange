@@ -11,38 +11,43 @@ logger = logging.getLogger(__name__)
 
 class _Request:
     method = 'GET' or 'POST'
+    _host = None # default to server host
+    _server = None
+    _client = None
 
     @abc.abstractmethod
     def _make_path(self, **kwargs):
-        pass
+        "generates the full HTTP request path"
 
     @abc.abstractmethod
     def _load(self):
-        pass
+        "loads response data into this object, and possibly also into the client db"
 
     __repr__ = obj_dict.repr
 
     @classmethod
-    async def fetch(cls, server, **kwargs):
-        self = cls(server, **kwargs)
-        logger.info("Fetching %s...", self.url)
-        self.html = await self._fetch()
-        logger.debug("Importing data fetched from %s...", self.url)
+    async def request(cls, client, server, **kwargs):
+        self = cls(client, server, **kwargs)
+        logger.info("requesting %s...", self.url)
+        self.html = await self._request()
+        logger.debug("Importing data requested from %s...", self.url)
         self._load()
         logger.info("...finished scraping %s.", self.url)
         return self
 
-    def __init__(self, server, **kwargs):
-        self.server = server
-        self.url = 'https://%s/%s' % (server.host, self._make_path(**kwargs))
+    def __init__(self, client, server, **kwargs):
+        self._client = client
+        self._server = server
+        self.url = 'https://%s/%s' % (self._host or self._server.host, self._make_path(**kwargs))
 
-    async def _fetch(self):
+    async def _request(self):
         if self.method == 'GET':
-            request = self.server._client._web_session.get(self.url)
+            request = self._client._web_session.get(self.url)
         elif self.method == 'POST':
-            fkey = await self.server._client._fkey
-            # TODO add that fkey!
-            request = self.server._client._web_session.post(self.url)
+            data = {}
+            if self._server:
+                data['fkey'] = (await self._server._fkey_request).fkey
+            request = self._client._web_session.post(self.url, data=data)
         else:
             raise ValueError('invalid .method')
 
@@ -53,6 +58,28 @@ class _Request:
             return html
 
 
+
+class StackOpenIDFKey(_Request):
+    _host = 'openid.stackexchange.com'
+
+    def _make_path(self):
+        return 'account/login'
+
+    def _load(self):
+        self.data = parse.FKey(self.html)
+
+        self.fkey = self.data.fkey
+
+
+
+class StackChatFKey(_Request):
+    def _make_path(self):
+        return ''
+
+    def _load(self):
+        self.data = parse.FKey(self.html)
+
+        self.fkey = self.data.fkey
 
 
 class RoomMessages(_Request):
@@ -104,8 +131,8 @@ class TranscriptDay(_Request):
 
         logger.debug("Inserting data into database.")
 
-        with self.server._client.sql_session() as sql:
-            self.room = self.server._get_or_create_room(sql, self.data.room_id)
+        with self._client.sql_session() as sql:
+            self.room = self._server._get_or_create_room(sql, self.data.room_id)
             self.room.mark_updated()
             self.room.name = self.data.room_name
 
@@ -113,7 +140,7 @@ class TranscriptDay(_Request):
             self.users = {}
 
             for m in self.data.messages:
-                message = self.server._get_or_create_message(sql, m.id)
+                message = self._server._get_or_create_message(sql, m.id)
                 message.mark_updated()
                 message.content_html = m.content_html
                 message.content_text = m.content_text
@@ -125,13 +152,13 @@ class TranscriptDay(_Request):
                     if m.parent_message_id in self.messages:
                         parent = self.messages[m.parent_message_id]
                     else:
-                        parent = self.server._get_or_create_message(sql, m.parent_message_id)
+                        parent = self._server._get_or_create_message(sql, m.parent_message_id)
                     message.parent_message_id = m.parent_message_id
 
                 owner = self.users.get(m.owner_user_id)
                 if not owner:
                     if m.owner_user_id:
-                        owner = self.server._get_or_create_user(sql, m.owner_user_id)
+                        owner = self._server._get_or_create_user(sql, m.owner_user_id)
                         if not owner.name:
                             owner.mark_updated()
                             # XXX: this is the name as of the time of the message, so it should really
@@ -140,7 +167,7 @@ class TranscriptDay(_Request):
                             owner.name = m.owner_user_name
                     else:
                         # deleted owner, default to Community.
-                        owner = self.server._get_or_create_user(sql, -1)
+                        owner = self._server._get_or_create_user(sql, -1)
                     self.users[m.owner_user_id] = owner
                 message.owner_meta_id = owner.meta_id
 

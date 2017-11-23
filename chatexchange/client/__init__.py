@@ -46,21 +46,23 @@ class Client:
     offline = False
 
     def __init__(self, db_path='sqlite:///:memory:', auth=None):
-        self._web_session = _HttpClientSession(
-            read_timeout=20,
-            raise_for_status=True)
-
         self.sql_engine = sqlalchemy.create_engine(db_path)
+        if db_path.startswith('sqlite:'):
+            self._prepare_sqlite_hacks()
         self._sql_sessionmaker = sqlalchemy.orm.sessionmaker(
             bind=self.sql_engine,
             expire_on_commit=False,
             class_=_SQLSession)
+        self._init_db()
 
-        if db_path.startswith('sqlite:'):
-            self._prepare_sqlite_hacks()
-        
+        self._web_session = _HttpClientSession(
+            read_timeout=20,
+            raise_for_status=True)
         self._request_throttle = async.Throttle(interval=0.5)
 
+        self._openid_fkey_request = _request.StackOpenIDFKey(self, None)
+
+    def _init_db(self):
         models.Base.metadata.create_all(self.sql_engine)
 
         with self.sql_session() as sql:
@@ -126,7 +128,9 @@ class Client:
             server = sql.query(Server).filter(
                 (models.Server.slug == slug_or_host) |
                 (models.Server.host == slug_or_host)).one()
-        server.set(_client=self)
+        server.set(
+            _client=self,
+            _fkey_request=_request.StackChatFKey(self, server))
         return server
 
     @property
@@ -134,16 +138,17 @@ class Client:
         return self.server('se')
 
     @property
-    def so(self):
-        return self.server('so')
-
-    @property    
     def mse(self):
         return self.server('mse')
+
+    @property
+    def so(self):
+        return self.server('so')
 
 
 class Server(models.Server):
     _client = None
+    _fkey_request = None
 
     def me(self):
         raise NotImplementedError()
@@ -203,7 +208,7 @@ class Server(models.Server):
 
         if not self._client.offline:
             await self._client._request_throttle.turn()
-            transcript = await _request.TranscriptDay.fetch(self, room_id=room_id)
+            transcript = await _request.TranscriptDay.request(self._client, self, room_id=room_id)
             room = transcript.room
 
         if room.meta_update_age <= self._client.required_max_age:
@@ -236,7 +241,7 @@ class Server(models.Server):
 
         if not self._client.offline:
             await self._server._client._request_throttle.turn()
-            transcript = await _request.TranscriptDay.fetch(self, message_id=message_id)
+            transcript = await _request.TranscriptDay.request(self._client, self.server, message_id=message_id)
 
             message = transcript.messages[message_id]
 
@@ -268,8 +273,10 @@ class Room(models.Room):
 
     async def old_messages(self, from_date=None):
         await self._server._client._request_throttle.turn()
-        transcript = await _request.TranscriptDay.fetch(
-            self._server, room_id=self.room_id,
+        transcript = await _request.TranscriptDay.request(
+            self._server._client,
+            self._server,
+            room_id=self.room_id,
             date=from_date)
 
         while True:
@@ -281,8 +288,8 @@ class Room(models.Room):
             previous_day = transcript.data.previous_day or transcript.data.first_day
             if previous_day:
                 await self._server._client._request_throttle.turn()
-                transcript = await _request.TranscriptDay.fetch(
-                    self._server, room_id=self.room_id, date=previous_day)
+                transcript = await _request.TranscriptDay.request(
+                    self._server._client, self._server, room_id=self.room_id, date=previous_day)
             else:
                 break
 

@@ -12,6 +12,12 @@ async def main():
         server = chat.server(server_slug)
         room = await server.room(room_id)
 
-        print(room)
+        print(room.name)
+        n = 0
+        async for m in room.old_messages():
+            n += 1
+            if n > 10:
+                break
+            print(m.content_text or m.content_html)
 
     return
