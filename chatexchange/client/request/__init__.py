@@ -10,7 +10,18 @@ logger = logging.getLogger(__name__)
 
 
 class _Request:
+    method = 'GET' or 'POST'
+
+    @abc.abstractmethod
+    def _make_path(self, **kwargs):
+        pass
+
+    @abc.abstractmethod
+    def _load(self):
+        pass
+
     __repr__ = _obj_dict.repr
+
     @classmethod
     async def fetch(cls, server, **kwargs):
         self = cls(server, **kwargs)
@@ -25,24 +36,39 @@ class _Request:
         self.server = server
         self.url = 'https://%s/%s' % (server.host, self._make_path(**kwargs))
 
-    @abc.abstractmethod
-    def _make_path(self, **kwargs):
-        pass
-
     async def _fetch(self):
-        async with self.server._client._web_session.get(self.url) as response:
+        if self.method == 'GET':
+            request = self.server._client._web_session.get(self.url)
+        elif self.method == 'POST':
+            fkey = await self.server._client._fkey
+            # TODO add that fkey!
+            request = self.server._client._web_session.post(self.url)
+        else:
+            raise ValueError('invalid .method')
+
+        async with request as response:
             logger.debug("...%s response from %s...", response.status, self.url)
             html = await response.text()
             logger.debug("...fully loaded")
             return html
 
-    @abc.abstractmethod
-    def _load(self):
-        pass
+
+
+
+class RoomMessages(_Request):
+    method = 'POST'
+
+    def _make_path(
+            self,
+            room_id,
+            before_message_id=None):
+        return '/chats/%s/events?before=%s&mode=Messages&msgCount=100' % (room_id, before_message_id or '')
 
 
 
 class TranscriptDay(_Request):
+    method = 'GET'
+
     def _make_path(
             self,
             room_id=None,

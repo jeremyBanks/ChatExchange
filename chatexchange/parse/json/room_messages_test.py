@@ -2,7 +2,8 @@ from .room_messages import RoomMessages
 
 
 def test():
-    assert RoomMessages(EXAMPLE_DATA)
+    parsed = RoomMessages(EXAMPLE_DATA)
+    print(parsed)
 
 
 EXAMPLE_DATA = r'''{"events":[
