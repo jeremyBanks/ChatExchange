@@ -2,5 +2,4 @@ image: python:3
 
 test:
   script:
-  - pip install pipenv -q
-  - pipenv install --dev
+  - ./test.cmd
