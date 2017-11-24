@@ -20,6 +20,10 @@ class _Request:
     def _make_path(self, **kwargs):
         "generates the full HTTP request path"
 
+    def _make_data(self, **kwargs):
+        "generates the GET params or POST form data for the request"
+        return None
+
     @abc.abstractmethod
     def _load(self):
         "loads response data into this object, and possibly also into the client db"
@@ -33,52 +37,45 @@ class _Request:
     @classmethod
     async def __request(cls, client, server, **kwargs):
         self = cls(client, server, **kwargs)
-        logger.info("requesting %s...", self.url)
+        self.logger.info("%s %s...", self.method, self.url)
         await client._request_throttle.turn()
         self._text = await self._request()
-        logger.debug("Importing data requested from %s...", self.url)
+        self.logger.debug("Importing data requested from %s...", self.url)
         self._load()
-        logger.info("...finished scraping %s.", self.url)
+        self.logger.info("...finished loading %s.", self.url)
         return self
 
     def __init__(self, client, server, **kwargs):
+        self.logger = logger.getChild(type(self).__name__)
         self._client = client
         self._server = server
         self.url = 'https://%s/%s' % (self._host or self._server.host, self._make_path(**kwargs))
+        self._request_data = self._make_data(**kwargs)
 
     async def _request(self):
         if self.method == 'GET':
-            request = self._client._web_session.get(self.url)
+            request = self._client._web_session.get(self.url, params=self._request_data)
         elif self.method == 'POST':
-            data = {}
+            data = dict(self._request_data)
             if self._server:
-                data['fkey'] = (await self._server._fkey_request).fkey
+                data.setdefault('fkey', (await self._server._fkey_request).fkey)
             request = self._client._web_session.post(self.url, data=data)
         else:
             raise ValueError('invalid .method')
 
         async with request as response:
-            logger.debug("...%s response from %s...", response.status, self.url)
+            self.logger.debug("%s response from %s...", response.status, self.url)
             text = await response.text()
-            logger.debug("...fully loaded")
+            self.logger.debug("...fully loaded")
             return text
 
 
 
-class StackOpenIDFKey(_Request):
-    _host = 'openid.stackexchange.com'
+class StackOverflowFKey(_Request):
+    method = 'GET'
 
-    def _make_path(self):
-        return 'account/login'
+    _host = 'stackoverflow.com'
 
-    def _load(self):
-        self.data = parse.FKey(self._text)
-
-        self.fkey = self.data.fkey
-
-
-
-class StackChatFKey(_Request):
     def _make_path(self):
         return ''
 
@@ -88,21 +85,72 @@ class StackChatFKey(_Request):
         self.fkey = self.data.fkey
 
 
+
+class StackOverflowLogin(_Request):
+    method = 'POST'
+
+    _host = 'stackoverflow.com'
+
+    def _make_path(self, **kw):
+        return 'users/login'
+
+    def _make_data(self, fkey, email, password):
+        return {
+            'fkey': fkey,
+            'email': email,
+            'password': password
+        }
+
+    def _load(self):
+        self.data = parse.ParseHTML(self._text)
+
+
+
+class StackChatFKey(_Request):
+    method = 'GET'
+
+    def _make_path(self):
+        return ''
+
+    def _load(self):
+        self.data = parse.FKey(self._text)
+
+        self.fkey = self.data.fkey
+
+
+
+class RoomWSAuth(_Request):
+    method = 'POST'
+
+    def _make_path(self, room_id):
+        return 'ws-auth'
+    
+    def _make_data(self, room_id):
+        return {'roomid': room_id}
+
+    def _load(self):
+        self.data = parse.ParseJSON(self._text)
+
+
+
 class RoomMessages(_Request):
     method = 'POST'
 
-    def _make_path(
-            self,
-            room_id,
-            before_message_id=''):
+    def _make_path(self, room_id, before_message_id=None):
         self._room_id = room_id
-        return 'chats/%s/events?mode=Messages&msgCount=500&before=%s' % (
-            room_id, before_message_id)
+        return 'chats/%s/events' % (room_id,)
+
+    def _make_data(self, room_id, before_message_id=None):
+        return {
+            'mode': 'Messages',
+            'msgCount': 500,
+            'before': before_message_id or ''
+        }
 
     def _load(self):
         self.data = parse.RoomMessages(self._text)
 
-        logger.debug("Inserting RoomMessages data.")
+        self.logger.debug("Inserting RoomMessages data.")
         
         with self._client.sql_session() as sql:
             self.room = self._server._get_or_create_room(sql, self._room_id)
@@ -166,7 +214,7 @@ class TranscriptDay(_Request):
     def _load(self):
         self.data = parse.TranscriptDay(self._text)
 
-        logger.debug("Inserting TranscriptDay data.")
+        self.logger.debug("Inserting TranscriptDay data.")
 
         with self._client.sql_session() as sql:
             self.room = self._server._get_or_create_room(sql, self.data.room_id)

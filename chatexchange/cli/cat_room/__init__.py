@@ -1,25 +1,39 @@
 import asyncio
 import logging
 
-from pprintpp import pprint
-
 import chatexchange
 
 
 
-async def main():
-    logging.getLogger('').setLevel(logging.ERROR)
+async def main(chat):
+    logging.getLogger('').setLevel(logging.WARNING)
     logging.getLogger('chatexchange').setLevel(logging.INFO)
 
-    server_slug = 'se'
-    room_id = 2110
+    server_slug = 'so'
+    room_id = 1
 
-    with chatexchange.Client() as chat:
-        server = chat.server(server_slug)
-        room = await server.room(room_id)
+    old_limit = 10
+    new_limit = 2
 
-        pprint(room.name)
-        async for m in room.old_messages():
-            pprint({m.owner and m.owner.name: m.content_text or m.content_html[:72]})
+    server = chat.server(server_slug)
+    room = await server.room(room_id)
+
+    print("ROOM NAME: ", room.name)
+
+    n = 0
+    async for m in room.old_messages():
+        n += 1
+        print(m.message_id, '[', m.owner and m.owner.name, ']', (m.content_text or m.content_html)[:64])
+
+        if n >= old_limit: 
+            break
+
+    n = 0
+    async for m in room.new_messages():
+        n += 1
+        print(m.message_id, '[', m.owner and m.owner.name, ']', (m.content_text or m.content_html)[:64])
+
+        if n >= new_limit:
+            break
 
     return

@@ -1,7 +1,12 @@
 import asyncio
+import getpass
 import importlib
 import logging
+import os
 import sys
+
+import chatexchange
+
 
 
 def main():
@@ -17,8 +22,21 @@ def main():
     if args:
         subcommand, *subcommand_args = args
         command_module = importlib.import_module('.' + subcommand, 'chatexchange.cli')
-        c = command_module.main(*subcommand_args)
-        asyncio.get_event_loop().run_until_complete(c)
+
+        se_email = os.environ.get('STACK_EXCHANGE_EMAIL') or os.environ.get('ChatExchangeU') or ''
+        se_password = os.environ.get('STACK_EXCHANGE_PASSWORD') or os.environ.get('ChatExchangeP') or ''
+
+        if not se_email:
+            se_email = getpass.getpass("stack exchange login email: ")
+            
+        if not se_password:
+            se_password = getpass.getpass("stack exchange password: ")
+
+        db_path = 'sqlite:///./.ChatExchange.sqlite'
+
+        with chatexchange.Client(db_path, se_email, se_password) as chat:
+            coro = command_module.main(chat, *subcommand_args)
+            asyncio.get_event_loop().run_until_complete(coro)
     else:
         sys.stderr.write("usage: %s $subcommand [$args...]\n" % (command))
         sys.exit(1)

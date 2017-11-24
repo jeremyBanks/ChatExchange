@@ -12,30 +12,24 @@ from chatexchange.client import Client
 logger = logging.getLogger(__name__)
 
 
-async def main():
-    email = os.environ['ChatExchangeU']
-    password = os.environ['ChatExchangeP']
+async def main(chat):
+    devs = [
+        chat.mse.user(134300),
+        chat.se.user(1251),
+        chat.so.user(1114)
+    ]
 
-    with Client('sqlite:///./.ChatExchange.sqlite.so', auth=(email, password)) as chat:
-        devs = [
-            chat.mse.user(134300),
-            chat.se.user(1251),
-            chat.so.user(1114)
-        ]
+    rooms = [
+        chat.mse.room(89),
+        chat.se.room(11540),
+        chat.so.room(6)
+    ]
 
-        rooms = [
-            chat.mse.room(89),
-            chat.se.room(11540),
-            chat.so.room(6)
-        ]
+    for room in await asyncio.gather(*rooms):
+        async for message in room.old_messages():
+            pass
 
-        for room in await asyncio.gather(*rooms):
-            async for message in room.old_messages():
-                pass
-
-            await report_most_replied(chat, room.server, room)
-    
-    return
+        await report_most_replied(chat, room.server, room)
 
 
 async def report_most_replied(chat, server, room):

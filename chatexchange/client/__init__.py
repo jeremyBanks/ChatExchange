@@ -7,6 +7,8 @@ import random
 import aiohttp
 import sqlalchemy.orm
 
+from .. import parse
+from ..parse.json import events
 from ..data import models, _seed
 from .._util import async
 from . import _request
@@ -45,7 +47,7 @@ class Client:
     required_max_age = max_age_dead
     offline = False
 
-    def __init__(self, db_path='sqlite:///:memory:', auth=None):
+    def __init__(self, db_path='sqlite:///:memory:', se_email=None, se_password=None):
         self.sql_engine = sqlalchemy.create_engine(db_path)
         if db_path.startswith('sqlite:'):
             self._prepare_sqlite_hacks()
@@ -60,7 +62,13 @@ class Client:
             raise_for_status=True)
         self._request_throttle = async.Throttle(interval=0.5)
 
-        self._openid_fkey_request = _request.StackOpenIDFKey(self, None)
+        # so-only simpler auth for now or maybe forever -- can we emulate global auth?
+        self._authenticated = asyncio.ensure_future(self._authenticate(se_email, se_password))
+    
+    async def _authenticate(self, se_email, se_password):
+        so = self.server('so')
+        r = await _request.StackOverflowFKey.request(self, None)
+        await _request.StackOverflowLogin.request(self, None, email=se_email, password=se_password, fkey=r.fkey)
 
     def _init_db(self):
         models.Base.metadata.create_all(self.sql_engine)
@@ -128,9 +136,13 @@ class Client:
             server = sql.query(Server).filter(
                 (models.Server.slug == slug_or_host) |
                 (models.Server.host == slug_or_host)).one()
+        async def f():
+            await self._authenticated
+            return await _request.StackChatFKey.request(self, server)
+
         server.set(
             _client=self,
-            _fkey_request=_request.StackChatFKey.request(self, server))
+            _fkey_request=asyncio.ensure_future(f()))
         return server
 
     @property
@@ -150,7 +162,9 @@ class Server(models.Server):
     _client = None
     _fkey_request = None
 
-    def me(self):
+    async def me(self):
+        await self._client._authenticated
+
         raise NotImplementedError()
 
     def _get_or_create_user(self, sql, user_id):
@@ -168,7 +182,9 @@ class Server(models.Server):
         user._server = self
         return user
         
-    def user(self, user_id):
+    async def user(self, user_id):
+        await self._client._authenticated
+
         with self._client.sql_session() as sql:
             user = self._get_or_create_user(sql, user_id)
 
@@ -200,6 +216,8 @@ class Server(models.Server):
         return room
 
     async def room(self, room_id):
+        await self._client._authenticated
+
         with self._client.sql_session() as sql:
             room = self._get_or_create_room(sql, room_id)
 
@@ -232,6 +250,8 @@ class Server(models.Server):
         return message
 
     async def message(self, message_id):
+        await self._client._authenticated
+
         with self._client.sql_session() as sql:
             message = self._get_or_create_message(sql, message_id)
 
@@ -239,7 +259,7 @@ class Server(models.Server):
             return message
 
         if not self._client.offline:
-            transcript = await _request.TranscriptDay.request(self._client, self.server, message_id=message_id)
+            transcript = await _request.TranscriptDay.request(self._client, self, message_id=message_id)
 
             message = transcript.messages[message_id]
 
@@ -249,7 +269,9 @@ class Server(models.Server):
         logger.warning("%s failed to load message %s, %s > %s", self, message_id, message.meta_update_age, self._client.required_max_age)
         return None
     
-    def rooms(self):
+    async def rooms(self):
+        await self._client._authenticated
+
         raise NotImplementedError()
         response = self._client._web_session.get('https://%s/rooms?tab=all&sort=active&nohide=true' % (self.host))
 
@@ -269,7 +291,9 @@ class Room(models.Room):
     def server(self):
         return self._server
 
-    async def old_messages(self, from_date=None):
+    async def old_messages(self):
+        await self._server._client._authenticated
+
         response = await _request.RoomMessages.request(
             self._server._client,
             self._server,
@@ -289,6 +313,39 @@ class Room(models.Room):
                     before_message_id=messages[-1].message_id)
             else:
                 break
+    
+    async def new_messages(self):
+        await self._server._client._authenticated
+
+        response = await _request.RoomWSAuth.request(
+            self._server._client,
+            self._server,
+            room_id=self.room_id)
+
+        url = response.data._data['url'] + '?l=0' # not sure what this is
+
+        logger.info(url)
+        async with self._server._client._web_session.ws_connect(url, headers={'Origin': 'https://chat.stackoverflow.com'}) as socket:
+            async for msg in socket:
+                if msg.type == aiohttp.WSMsgType.TEXT:
+                    parsed = parse.WSEvents(msg.data)
+                    for event in parsed.events:
+                        if isinstance(event, events.MessagePosted):
+                            data = event._data
+
+                            if data['room_id'] != self.room_id:
+                                continue
+
+                            with self._server._client.sql_session() as sql:
+                                message = self._server._get_or_create_message(sql, data['id'])
+                                message.mark_updated()
+                                message.content_html = data['content']
+                                owner = self._server._get_or_create_user(sql, data['id'])
+                                owner.mark_updated()
+                                owner.name = data['user_name']
+                                message.owner_meta_id = owner.meta_id
+
+                            yield message
 
     def send(self, content_markdown):
         raise NotImplementedError()
