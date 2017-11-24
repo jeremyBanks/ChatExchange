@@ -207,7 +207,6 @@ class Server(models.Server):
             return room
 
         if not self._client.offline:
-            await self._client._request_throttle.turn()
             transcript = await _request.TranscriptDay.request(self._client, self, room_id=room_id)
             room = transcript.room
 
@@ -240,7 +239,6 @@ class Server(models.Server):
             return message
 
         if not self._client.offline:
-            await self._server._client._request_throttle.turn()
             transcript = await _request.TranscriptDay.request(self._client, self.server, message_id=message_id)
 
             message = transcript.messages[message_id]
@@ -272,24 +270,23 @@ class Room(models.Room):
         return self._server
 
     async def old_messages(self, from_date=None):
-        await self._server._client._request_throttle.turn()
-        transcript = await _request.TranscriptDay.request(
+        response = await _request.RoomMessages.request(
             self._server._client,
             self._server,
-            room_id=self.room_id,
-            date=from_date)
+            room_id=self.room_id)
 
         while True:
-            for message in sorted(
-                    transcript.messages.values(),
-                    key=lambda m: -m.message_id):
-                yield message
+            if response.messages:
+                messages = list(sorted(response.messages, key=lambda m: -m.message_id))
 
-            previous_day = transcript.data.previous_day or transcript.data.first_day
-            if previous_day:
-                await self._server._client._request_throttle.turn()
-                transcript = await _request.TranscriptDay.request(
-                    self._server._client, self._server, room_id=self.room_id, date=previous_day)
+                for message in messages:
+                    yield message
+                    
+                response = await _request.RoomMessages.request(
+                    self._server._client,
+                    self._server,
+                    room_id=self.room_id,
+                    before_message_id=messages[-1].message_id)
             else:
                 break
 

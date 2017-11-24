@@ -1,10 +1,16 @@
 import asyncio
+import logging
+
+from pprintpp import pprint
 
 import chatexchange
 
 
 
 async def main():
+    logging.getLogger('').setLevel(logging.ERROR)
+    logging.getLogger('chatexchange').setLevel(logging.INFO)
+
     server_slug = 'se'
     room_id = 2110
 
@@ -12,22 +18,8 @@ async def main():
         server = chat.server(server_slug)
         room = await server.room(room_id)
 
-        from chatexchange.client._request import RoomMessages
-        response = await RoomMessages.request(
-            chat,
-            server,
-            room_id=room.room_id)
-
-        print(response.messages)
-
-        return
-
-        print(room.name)
-        n = 0
+        pprint(room.name)
         async for m in room.old_messages():
-            n += 1
-            if n > 10:
-                break
-            print(m.content_text or m.content_html)
+            pprint({m.owner and m.owner.name: m.content_text or m.content_html[:72]})
 
     return

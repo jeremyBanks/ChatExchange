@@ -1,4 +1,5 @@
 import abc
+import asyncio
 import logging
 
 from ... import parse
@@ -26,9 +27,14 @@ class _Request:
     __repr__ = obj_dict.repr
 
     @classmethod
-    async def request(cls, client, server, **kwargs):
+    def request(cls, *a, **kw):
+        return asyncio.ensure_future(cls.__request(*a, **kw))
+
+    @classmethod
+    async def __request(cls, client, server, **kwargs):
         self = cls(client, server, **kwargs)
         logger.info("requesting %s...", self.url)
+        await client._request_throttle.turn()
         self._text = await self._request()
         logger.debug("Importing data requested from %s...", self.url)
         self._load()
@@ -88,9 +94,10 @@ class RoomMessages(_Request):
     def _make_path(
             self,
             room_id,
-            before_message_id=None):
+            before_message_id=''):
         self._room_id = room_id
-        return 'chats/%s/events?before=%s&mode=Messages&msgCount=100' % (room_id, before_message_id or '')
+        return 'chats/%s/events?mode=Messages&msgCount=500&before=%s' % (
+            room_id, before_message_id)
 
     def _load(self):
         self.data = parse.RoomMessages(self._text)
@@ -112,11 +119,11 @@ class RoomMessages(_Request):
                     if message.parent_message_id:
                         parent = self._server._get_or_create_message(sql, message.parent_message_id)
 
-                    if m['user_id']:
+                    if m.get('user_id'):
                         owner = self._server._get_or_create_user(sql, m['user_id'])
                         owner.mark_updated()
 
-                        owner.user_name = m['user_name']
+                        owner.name = m['user_name']
                         message.owner_meta_id = owner.meta_id
                     
                     self.messages.append(message)
