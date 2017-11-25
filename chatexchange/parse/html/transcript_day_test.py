@@ -1,6 +1,7 @@
 from .transcript_day import *
 
 
+
 def test():
     parsed = TranscriptDay(EXAMPLE_DATA)
     print(parsed)

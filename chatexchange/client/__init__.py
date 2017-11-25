@@ -62,13 +62,15 @@ class Client:
             raise_for_status=True)
         self._request_throttle = async.Throttle(interval=0.5)
 
-        # so-only simpler auth for now or maybe forever -- can we emulate global auth?
         self._authenticated = asyncio.ensure_future(self._authenticate(se_email, se_password))
     
     async def _authenticate(self, se_email, se_password):
         so = self.server('so')
-        r = await _request.StackOverflowFKey.request(self, None)
-        await _request.StackOverflowLogin.request(self, None, email=se_email, password=se_password, fkey=r.fkey)
+        so_fkey = await _request.StackOverflowFKey.request(self, None)
+        await _request.StackOverflowLogin.request(self, None, email=se_email, password=se_password, fkey=so_fkey.fkey)
+        # XXX: SE/MSE auth is currently broken
+        # mse_fkey = await _request.MetaStackExchangeFKey.request(self, None)
+        # await _request.MetaStackExchangeLogin.request(self, None, email=se_email, password=se_password, fkey=mse_fkey.fkey)
 
     def _init_db(self):
         models.Base.metadata.create_all(self.sql_engine)
@@ -349,7 +351,6 @@ class Room(models.Room):
 
     def send(self, content_markdown):
         raise NotImplementedError()
-
 
 
 class Message(models.Message):

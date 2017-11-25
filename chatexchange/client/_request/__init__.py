@@ -70,26 +70,40 @@ class _Request:
             return text
 
 
-
-class StackOverflowFKey(_Request):
-    method = 'GET'
-
-    _host = 'stackoverflow.com'
-
-    def _make_path(self):
-        return ''
-
+class FKeyPage(_Request):
     def _load(self):
         self.data = parse.FKey(self._text)
 
         self.fkey = self.data.fkey
 
 
+class StackChatFKey(FKeyPage):
+    method = 'GET'
 
-class StackOverflowLogin(_Request):
-    method = 'POST'
+    def _make_path(self):
+        return ''
+
+
+class StackOverflowFKey(FKeyPage):
+    method = 'GET'
 
     _host = 'stackoverflow.com'
+
+    def _make_path(self):
+        return 'users/login'
+
+
+class MetaStackExchangeFKey(FKeyPage):
+    method = 'GET'
+
+    _host = 'meta.stackexchange.com'
+
+    def _make_path(self):
+        return 'users/login'
+
+
+class StackSiteLogin(FKeyPage):
+    method = 'POST'
 
     def _make_path(self, **kw):
         return 'users/login'
@@ -105,18 +119,12 @@ class StackOverflowLogin(_Request):
         self.data = parse.ParseHTML(self._text)
 
 
+class StackOverflowLogin(StackSiteLogin):
+    _host = 'stackoverflow.com'
 
-class StackChatFKey(_Request):
-    method = 'GET'
 
-    def _make_path(self):
-        return ''
-
-    def _load(self):
-        self.data = parse.FKey(self._text)
-
-        self.fkey = self.data.fkey
-
+class MetaStackExchangeLogin(StackSiteLogin):
+    _host = 'meta.stackexchange.com'
 
 
 class RoomWSAuth(_Request):

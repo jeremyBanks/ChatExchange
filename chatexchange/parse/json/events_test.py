@@ -1,4 +1,4 @@
-from .room_messages import RoomMessages
+from .events import RoomMessages
 
 
 def test():

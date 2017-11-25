@@ -6,8 +6,8 @@ import chatexchange
 
 
 async def main(chat):
-    logging.getLogger('').setLevel(logging.WARNING)
-    logging.getLogger('chatexchange').setLevel(logging.WARNING)
+    logging.getLogger('').setLevel(logging.DEBUG)
+    logging.getLogger('chatexchange').setLevel(logging.DEBUG)
 
     server_slug = 'so'
     room_id = 1

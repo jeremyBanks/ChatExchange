@@ -13,12 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 async def main(chat):
-    devs = [
-        chat.mse.user(134300),
-        chat.se.user(1251),
-        chat.so.user(1114)
-    ]
-
     rooms = [
         chat.mse.room(89),
         chat.se.room(11540),
