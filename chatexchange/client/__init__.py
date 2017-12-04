@@ -273,6 +273,18 @@ class Server(models.Server):
     
     async def rooms(self):
         await self._client._authenticated
+        logger.warning("Server.rooms() only checks locally for now.")
+
+        rooms = []
+        with self._client.sql_session() as sql:
+            query = sql.query(Room) \
+                .filter(models.Room.server_meta_id == self.meta_id) \
+                .order_by(models.Room.server_meta_id)
+            for room in query:
+                room._server = self
+                rooms.append(room)
+
+        return rooms
 
         raise NotImplementedError()
         response = self._client._web_session.get('https://%s/rooms?tab=all&sort=active&nohide=true' % (self.host))
@@ -376,6 +388,7 @@ class Message(models.Message):
 
     async def replies(self):
         logger.warning("Message.replies() only checks locally for now.")
+
         with self._server._client.sql_session() as sql:
             messages = list(
                 sql.query(Message)
