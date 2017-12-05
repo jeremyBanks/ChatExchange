@@ -1,2 +1,1 @@
-web: python -m chatexchange web
-
+web: python -m stackchat web

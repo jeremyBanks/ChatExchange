@@ -1,25 +1,21 @@
 # This README is more aspirational than descriptive, that is to say, this is mostly `NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED`.
 
-ChatExchange 3
-==============
+stack.chat
+==========
 
 A Python 3 library and command-line tool for Stack Exchange chat.
 
 ## Installation
 
 ```
-pip install chatexchange3  # or your Python 3 packaging alternative of choice
+pip install stack.chat  # or your Python 3 packaging alternative of choice
 ```
 
 ## Authentication
 
-For authenticated use specify a Stack Exchange username and password in
-the `ChatExchangeU` and `ChatExchangeP` environment variables. OpenID and
-OAuth authentication are not supported.
-
-## Command-Line Interface
-
-This hasn't been implemented, but I'd like to support things like this.
+For authenticated use specify a Stack Exchange email address and password in
+the `STACK_EXCHANGE_EMAIL` and `STACK_EXCHANGE_PASSWORD` environment variables.
+OpenID and OAuth authentication are not supported.
 
 ### Examples
 
@@ -27,57 +23,38 @@ Import (or update) the full history of a chatroom to the database.
 Records updated within the last 3600 seconds will be considered up-to-date.
 
 ```
-chatexchange sqlite://./data se/r/1 --all --max-age=3600
+stackchat sqlite://./data se/r/1 --all --max-age=3600
 ```
 
 Add new messages to the database as they come in:
 
 ```
-chatexchange sqlite://./data chat.stackexchange.com/rooms/1 --all --max-age=Infinity --watch
+stackchat sqlite://./data chat.stackexchange.com/rooms/1 --all --max-age=Infinity --watch
 ```
 
 Send a message, then disconnect (a temporary in-memory SQLite database will be used):
 
 ```
-chatexchange se/r/1 --send "hello world"
+stackchat se/r/1 --send "hello world"
 ```
 
 Or maybe using our local slugs:
 
 ```
-chatexchange r/B6 -s "hello world"
+stackchat r/B6 -s "hello world"
 ```
 
 ## Python Interface
 
 ### Public (Please Use)
 
-The root of the interface is your `Client`, either `BlockingClient`:
+The root of the interface is your `Client`:
 
 ```
-chat = chatexchange.BlockingClient(auth=('em@i.l', 'p4ssW0rd'))
-sandbox = chat.se.room(room_id=1)
-hello = sandbox.send("hello, %s 😶" % (room.name))
-for i, reply in enumerate(hello.replies()):
-    if i == 0:
-        reply.reply("hello, %s. 😐" % (reply.name))
-    elif i == 1:
-        reply.reply("Hello, %s. 🙂" % (reply.name))
-    else:
-        reply.reply("Hello, %s! 😄" % (reply.name))
-        break
-
-time.sleep(1.0)
-goodbye = sandbox.send("see y'all later!")
-```
-
-or `AsyncClient`:
-
-```
-chat = chatexchange.AsyncClient(auth=('em@i.l', 'p4ssW0rd'))
+chat = stackchat.Client(auth=('em@i.l', 'p4ssW0rd'))
 sandbox = await chat.se.room(room_id=1)
 hello = await sandbox.send("hello, %s 😶" % (room.name))
-async for i, reply in chatexchange.async.enumerate(hello.replies()):
+async for i, reply in stackchat.async.enumerate(hello.replies()):
     if i == 0:
         reply.reply("hello, %s. 😐" % (reply.name))
     elif i == 1:
@@ -101,8 +78,8 @@ There's also an `offline=True` option to use only local data.
 Here's most of the API:
 
 ```
-- chatexchange
-    - .AsyncClient(db_path='sqlite:///:memory:', auth=None)
+- stackchat
+    - .Client(db_path='sqlite:///:memory:', auth=None)
         - .server(slug_or_host) -> .client.Server
         - .se -> .client.Server
         - .so -> .client.Server
@@ -184,7 +161,7 @@ Here's most of the API:
 ### Internal (Do Not Use)
 
 ```
-- chatexchange
+- stackchat
     - ._seed
         - .data() # yields a bunch of seed data that needs to be added to new databases
 
@@ -216,5 +193,5 @@ be dual licensed as above, without any additional terms or conditions.
 ### Contributors
 
 Please see the Git commit history or 
-https://github.com/jeremyBanks/ChatExchange/contributors and
-https://github.com/Manishearth/ChatExchange/contributors.
+https://github.com/Manishearth/stackchat/contributors and
+https://gitlab.com/stack.chat/stack.chat/graphs/master.

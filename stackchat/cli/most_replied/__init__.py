@@ -5,7 +5,7 @@ import os
 
 from pprintpp import pprint as print
 
-from chatexchange.client import Client
+from stackchat.client import Client
 
 
 

@@ -5,7 +5,7 @@ import logging
 import os
 import sys
 
-import chatexchange
+import stackchat
 
 
 
@@ -22,13 +22,13 @@ def main():
 
     if {'-q', '--quiet'} & flags:
         logging.getLogger().setLevel(logging.ERROR)
-        logging.getLogger('chatexchange').setLevel(logging.ERROR)
+        logging.getLogger('stackchat').setLevel(logging.ERROR)
     elif {'-v', '--verbose'} & flags:
         logging.getLogger().setLevel(logging.DEBUG)
-        logging.getLogger('chatexchange').setLevel(logging.DEBUG)
+        logging.getLogger('stackchat').setLevel(logging.DEBUG)
     else:
         logging.getLogger().setLevel(logging.WARNING)
-        logging.getLogger('chatexchange').setLevel(logging.DEBUG)
+        logging.getLogger('stackchat').setLevel(logging.DEBUG)
 
     logging.basicConfig(format="%(e)32s %(relative)6s ms%(n)s%(levelled_name)32s %(message)s", level=logging.DEBUG)
     for handler in logging.getLogger().handlers:
@@ -39,7 +39,7 @@ def main():
 
         logger.debug('flags, subcommand, args == %r, %r, %r', flags, subcommand, subcommand_args)
 
-        command_module = importlib.import_module('.' + subcommand, 'chatexchange.cli')
+        command_module = importlib.import_module('.' + subcommand, 'stackchat.cli')
 
         logger.debug('command_module == %r', command_module)
 
@@ -52,9 +52,9 @@ def main():
         if not se_password:
             se_password = getpass.getpass("stack exchange password: ")
 
-        db_path = 'sqlite:///./.ChatExchange.sqlite'
+        db_path = 'sqlite:///./.stackchat.sqlite'
 
-        with chatexchange.Client(db_path, se_email, se_password) as chat:
+        with stackchat.Client(db_path, se_email, se_password) as chat:
             coro = command_module.main(chat, *subcommand_args)
             asyncio.get_event_loop().run_until_complete(coro)
     else:

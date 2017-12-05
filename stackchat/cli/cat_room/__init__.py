@@ -1,13 +1,13 @@
 import asyncio
 import logging
 
-import chatexchange
+import stackchat
 
 
 
 async def main(chat):
     logging.getLogger('').setLevel(logging.DEBUG)
-    logging.getLogger('chatexchange').setLevel(logging.DEBUG)
+    logging.getLogger('stackchat').setLevel(logging.DEBUG)
 
     server_slug = 'so'
     room_id = 1

@@ -22,14 +22,14 @@ async def main(chat):
     async def index(request):
         return web.Response(content_type='text/html', text=r'''
             <!doctype html>
-            <title>-m chatexchange web</title>
+            <title>-m stackchat web</title>
             <link rel="stylesheet" href="/style.css" />
 
             <p>
-                import chatexchange
+                import stackchat
             </p>
 
-            <h1>with chatexchange.Client(...) as chat:</h1>
+            <h1>with stackchat.Client(...) as chat:</h1>
 
             <p><a href="/se">chat.server("se") # Stack Exchange</a></p>
             <p><a href="/so">chat.server("so") # Stack Overflow</a></p>
@@ -109,14 +109,14 @@ async def main(chat):
 
         return web.Response(content_type='text/html', text=r'''
             <!doctype html>
-            <title>-m chatexchange web</title>
+            <title>-m stackchat web</title>
             <link rel="stylesheet" href="/style.css" />
 
             <p>
-                import chatexchange
+                import stackchat
             </p>
 
-            <h1>with chatexchange.Client(...) as chat:</h1>
+            <h1>with stackchat.Client(...) as chat:</h1>
 
             <h2>{html_name}</h2>
 
@@ -132,28 +132,28 @@ async def main(chat):
         messages = await alist(aislice(room.old_messages(), 0, 5))
 
         html_name = html.escape("room = await chat.server(%r).room(%r) # %s" % (server.slug, room.room_id, room.name))
-        html_messages = html.escape("\n".join(
-            "%s: %s" % (m.owner.name, m.content_text or m.content_html or m.content_markdown) for m in messages
-        ))
+        html_messages = "\n".join(
+            "<b><a href="/u/%s">%s</a></b>: %s" % (m.owner.user_id, html.escape(m.owner.name), html.escape(m.content_text or m.content_html or m.content_markdown)) for m in messages
+        )
 
         return web.Response(content_type='text/html', text=r'''
             <!doctype html>
-            <title>-m chatexchange web</title>
+            <title>-m stackchat web</title>
             <link rel="stylesheet" href="/style.css" />
 
             <p>
-                import chatexchange<br />
+                import stackchat<br />
                 from aitertools import alist, islice as aislice
             </p>
 
-            <h1>with chatexchange.Client(…) as chat:</h1>
+            <h1>with stackchat.Client(…) as chat:</h1>
 
             <h2>{html_name}</h2>
 
             <h3>room.send(</h3>
 
-            <form>
-                "<input placeholder="Hello, world." />"<button type="submit">) # send</button>
+            <form method="POST">
+                "<input name="content_markdown" placeholder="Hello, world." />"<button type="submit">) # send</button>
             </form>
 
             <h3>messages = await alist(aislice(room.old_messages(), 0, 5))</h3>
