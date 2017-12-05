@@ -20,24 +20,61 @@ async def main(chat):
 
     @get(r'/')
     async def index(request):
-        return web.Response(content_type='text/html', text='''
+        return web.Response(content_type='text/html', text=r'''
             <!doctype html>
             <title>-m chatexchange web</title>
             <link rel="stylesheet" href="/style.css" />
 
-            <p>servers: <a href="/se">Stack Exchange</a>, <a href="/so">Stack Overflow</a>, <a href="/mse">Meta Stack Exchange</a>
+            <p>
+                import chatexchange
+            </p>
+
+            <h1>with chatexchange.Client(...) as chat:</h1>
+
+            <p><a href="/se">chat.server("se") # Stack Exchange</a></p>
+            <p><a href="/so">chat.server("so") # Stack Overflow</a></p>
+            <p><a href="/mse">chat.server("mse") # Meta Stack Exchange</a></p>
         ''')
 
     @get(r'/style.css')
     async def css(request):
-        return web.Response(content_type='text/css', text='''
+        return web.Response(content_type='text/css', text=r'''
             body {
                 font-family: monospace;
+            }
+
+            * {
+                font-family: inherit;
             }
 
             body {
                 max-width: 800px;
                 margin: 32px;
+                padding-left: 32px;
+            }
+
+            h1 {
+                margin: 0;
+                margin-top: 16px;
+                margin-left: -32px; 
+            }
+
+            h2 {
+                margin: 0;
+                margin-top: 8px;
+                margin-left: -16px; 
+            }
+
+            h3 {
+                margin: 0;
+                margin-top: 4px;
+                margin-left: -8px; 
+            }
+
+            h4 {
+                margin: 0;
+                margin-top: 2px;
+                margin-left: -4px; 
             }
 
             a {
@@ -49,6 +86,16 @@ async def main(chat):
                 a:active {
                     color: red;
                 }
+
+            input {
+                border: none;
+                background: none;
+                width: 256px;
+            }
+
+            button {
+                font-weight: bold;
+            }
         ''')
 
     @get(r'/{slug:[a-z]+}')
@@ -56,19 +103,24 @@ async def main(chat):
         slug = request.match_info['slug']
         server = chat.server(slug)
 
-        html_name = html.escape("/%s %s (%s)" % (server.slug, server.name, server.host))
-        html_info = html.escape(repr(dict(
-           rooms=await server.rooms()
-        )))
+        html_name = html.escape("server = chat.server(%r) # %s" % (server.slug, server.name))
+        html_info = "\n".join(
+           ("<p><a href=\"%s\">server.room(%s) # %s</a></p>" % (html.escape("/%s/%s" % (slug, room.room_id)), room.room_id, html.escape(room.name))) for room in await server.rooms())
 
-        return web.Response(content_type='text/html', text='''
+        return web.Response(content_type='text/html', text=r'''
             <!doctype html>
             <title>-m chatexchange web</title>
             <link rel="stylesheet" href="/style.css" />
 
-            <h1>{html_name}</h1>
+            <p>
+                import chatexchange
+            </p>
 
-            <pre>{html_info}</pre>
+            <h1>with chatexchange.Client(...) as chat:</h1>
+
+            <h2>{html_name}</h2>
+
+            {html_info}
         '''.format(**locals()))
 
     @get(r'/{slug:[a-z]+}/{room_id:[0-9]+}')
@@ -77,21 +129,40 @@ async def main(chat):
         room_id = int(request.match_info['room_id'])
         server = chat.server(slug)
         room = await server.room(room_id)
-        messages = await alist(aislice(room.old_messages(), 0, 50))
+        messages = await alist(aislice(room.old_messages(), 0, 5))
 
-        html_name = html.escape("/%s/%s#%s" % (server.slug, room.room_id, re.sub('[^a-z]+', '-', room.name.lower())))
-        html_info = html.escape("\n".join(
+        html_name = html.escape("room = await chat.server(%r).room(%r) # %s" % (server.slug, room.room_id, room.name))
+        html_messages = html.escape("\n".join(
             "%s: %s" % (m.owner.name, m.content_text or m.content_html or m.content_markdown) for m in messages
         ))
 
-        return web.Response(content_type='text/html', text='''
+        return web.Response(content_type='text/html', text=r'''
             <!doctype html>
             <title>-m chatexchange web</title>
             <link rel="stylesheet" href="/style.css" />
 
-            <h1>{html_name}</h1>
+            <p>
+                import chatexchange<br />
+                from aitertools import alist, islice as aislice
+            </p>
 
-            <pre>{html_info}</pre>
+            <h1>with chatexchange.Client(…) as chat:</h1>
+
+            <h2>{html_name}</h2>
+
+            <h3>room.send(</h3>
+
+            <form>
+                "<input placeholder="Hello, world." />"<button type="submit">) # send</button>
+            </form>
+
+            <h3>messages = await alist(aislice(room.old_messages(), 0, 5))</h3>
+
+            <pre>{html_messages}</pre>
+
+            <h3>async for message in aislice(room.new_messages(), 0, 5):</h3>
+
+            <pre>NotImplemented</pre>
         '''.format(**locals()))
 
     logger.info("Creating server.")
