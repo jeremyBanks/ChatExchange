@@ -19,6 +19,91 @@ OpenID and OAuth authentication are not supported.
 
 ### Examples
 
+```
+stack.chat config [--global]
+E email:
+E password:
+E written to ./.stack.chat.toml
+
+# start simple
+stack.chat send se 1 "hello world"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$ stack.chat /se/1 alias sandbox
+E written to ./.stack.chat.toml
+
+$ stack.chat sandbox send "hello world"
+E sent
+
+$ stack.chat sandbox follow
+E # 2017-12-05T22:31Z
+E b Joe#124313: lol what
+E c Tim#146: I don't like it
+E d Bob#123: hello world
+E # 2017-12-05T22:32Z
+E e Tim: oh darn it's a bot
+^C
+
+$ stack.chat sandbox reply e "that's enough of that!"
+
+
+stack.chat send /se/1 "hello world"
+stack.chat send /se/1 "hello world" "goodbye world"
+stack.chat send /se/1 - # default, stdin
+stack.chat send /se/1 # default, stdin
+stack.chat send /se/1 hello - goodbye # stdin and positionals
+
+stack.chat send /se/1 --superping 815
+
+stack.chat /se/1 reply 10
+stack.chat /se/1 
+
+stack.chat read /so/1 -5:+5
+
+start_offset:end_or_future_offset:
+
+-10:0 the last 10 messages and no more
+-200:-100 the last 200-100 messages
+0: future messages
+0:+10 next 10 messages
+
+but how do you handle the first messages?
+10:  everything except first ten messages?
+10:20 ten to twenty, but not the same as
+10:+20 ten to twenty ahead?
+
+which I guess means we need to accept
+
++10:+20 for skipping 10 and then seeing 20
+
+
+```
+
+
+
 Import (or update) the full history of a chatroom to the database.
 Records updated within the last 3600 seconds will be considered up-to-date.
 

@@ -10,4 +10,3 @@ push-to-heroku:
   script:
   - git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/stackchat-dev.git
   - git push -f heroku master
-
