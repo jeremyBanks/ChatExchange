@@ -23,25 +23,25 @@ Import (or update) the full history of a chatroom to the database.
 Records updated within the last 3600 seconds will be considered up-to-date.
 
 ```
-stackchat sqlite://./data se/r/1 --all --max-age=3600
+stack.chat sqlite://./data se/r/1 --all --max-age=3600
 ```
 
 Add new messages to the database as they come in:
 
 ```
-stackchat sqlite://./data chat.stackexchange.com/rooms/1 --all --max-age=Infinity --watch
+stack.chat sqlite://./data chat.stackexchange.com/rooms/1 --all --max-age=Infinity --watch
 ```
 
 Send a message, then disconnect (a temporary in-memory SQLite database will be used):
 
 ```
-stackchat se/r/1 --send "hello world"
+stack.chat se/r/1 --send "hello world"
 ```
 
 Or maybe using our local slugs:
 
 ```
-stackchat r/B6 -s "hello world"
+stack.chat r/B6 -s "hello world"
 ```
 
 ## Python Interface

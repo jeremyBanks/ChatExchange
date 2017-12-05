@@ -2,4 +2,9 @@ from . import cli
 
 
 
-cli.main()
+def main():
+    cli.main()
+
+
+if __name__ == '__main__':
+    main()

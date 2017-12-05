@@ -7,7 +7,7 @@ name = "pypi"
 
 [packages]
 
-sqlalchemy = "*"
+SQLAlchemy = "*"
 lxml = "*"
 "html5lib" = "*"
 hashids = "*"

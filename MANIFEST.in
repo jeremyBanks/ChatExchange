@@ -1,0 +1,6 @@
+include LICENSE*
+include README*
+include Pipfile*
+include *.py
+include *.cmd
+recursive-include stackchat *.py

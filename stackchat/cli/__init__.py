@@ -20,6 +20,10 @@ def main():
         flags.add(args[0])
         args = args[1:]
 
+    if {'--version'} & flags:
+        sys.stdout.write("stack.chat dev\n")
+        sys.exit(1)
+
     if {'-q', '--quiet'} & flags:
         logging.getLogger().setLevel(logging.ERROR)
         logging.getLogger('stackchat').setLevel(logging.ERROR)
