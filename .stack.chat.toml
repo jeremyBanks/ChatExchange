@@ -1,0 +1,7 @@
+# stack.chat will use credentials from .stack.chat.toml config files located
+# in the working directory or home directory, or from the STACK_EXCHANGE_EMAIL
+# and STACK_EXCHANGE_PASSWORD environment variables.
+
+[credentials.stack-exchange]
+email = ""
+password = ""
