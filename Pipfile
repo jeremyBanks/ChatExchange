@@ -15,6 +15,7 @@ pprintpp = "*"
 aiohttp = "*"
 aiodns = "*"
 cssselect = "*"
+aitertools = "*"
 
 
 [dev-packages]

@@ -3,8 +3,10 @@ import itertools
 import asyncio
 import logging
 import os
+import re
 import html
 
+from aitertools import alist, islice as aislice
 from aiohttp import web
 
 
@@ -64,7 +66,28 @@ async def main(chat):
             <title>-m chatexchange web</title>
             <link rel="stylesheet" href="/style.css" />
 
-            <p><a href="/">&lt;&mdash;</a></p>
+            <h1>{html_name}</h1>
+
+            <pre>{html_info}</pre>
+        '''.format(**locals()))
+
+    @get(r'/{slug:[a-z]+}/{room_id:[0-9]+}')
+    async def room(request):
+        slug = request.match_info['slug']
+        room_id = int(request.match_info['room_id'])
+        server = chat.server(slug)
+        room = await server.room(room_id)
+        messages = await alist(aislice(room.old_messages(), 0, 50))
+
+        html_name = html.escape("/%s/%s#%s" % (server.slug, room.room_id, re.sub('[^a-z]+', '-', room.name.lower())))
+        html_info = html.escape("\n".join(
+            "%s: %s" % (m.owner.name, m.content_text or m.content_html or m.content_markdown) for m in messages
+        ))
+
+        return web.Response(content_type='text/html', text='''
+            <!doctype html>
+            <title>-m chatexchange web</title>
+            <link rel="stylesheet" href="/style.css" />
 
             <h1>{html_name}</h1>
 

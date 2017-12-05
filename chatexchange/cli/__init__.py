@@ -9,11 +9,26 @@ import chatexchange
 
 
 
+logger = logging.getLogger(__name__)
+
+
 def main():
     command, *args = sys.argv
 
-    logging.getLogger().setLevel(logging.WARNING)
-    logging.getLogger('chatexchange').setLevel(logging.DEBUG)
+    flags = set()
+    while args and args[0][:1] == '-':
+        flags.add(args[0])
+        args = args[1:]
+
+    if {'-q', '--quiet'} & flags:
+        logging.getLogger().setLevel(logging.ERROR)
+        logging.getLogger('chatexchange').setLevel(logging.ERROR)
+    elif {'-v', '--verbose'} & flags:
+        logging.getLogger().setLevel(logging.DEBUG)
+        logging.getLogger('chatexchange').setLevel(logging.DEBUG)
+    else:
+        logging.getLogger().setLevel(logging.WARNING)
+        logging.getLogger('chatexchange').setLevel(logging.DEBUG)
 
     logging.basicConfig(format="%(e)32s %(relative)6s ms%(n)s%(levelled_name)32s %(message)s", level=logging.DEBUG)
     for handler in logging.getLogger().handlers:
@@ -21,7 +36,12 @@ def main():
 
     if args:
         subcommand, *subcommand_args = args
+
+        logger.debug('flags, subcommand, args == %r, %r, %r', flags, subcommand, subcommand_args)
+
         command_module = importlib.import_module('.' + subcommand, 'chatexchange.cli')
+
+        logger.debug('command_module == %r', command_module)
 
         se_email = os.environ.get('STACK_EXCHANGE_EMAIL') or os.environ.get('ChatExchangeU') or ''
         se_password = os.environ.get('STACK_EXCHANGE_PASSWORD') or os.environ.get('ChatExchangeP') or ''
