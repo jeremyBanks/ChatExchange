@@ -25,6 +25,7 @@ setup = lambda: setuptools.setup(
         'aiodns',
         'cssselect',
         'aitertools',
+        'toml',
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
@@ -40,7 +41,7 @@ setup = lambda: setuptools.setup(
         'console_scripts': [
             'stack.chat=stackchat.__main__:main',
             'stackchat=stackchat.__main__:main',
-        ]
+        ],
     })
 
 

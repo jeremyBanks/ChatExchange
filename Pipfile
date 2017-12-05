@@ -22,4 +22,3 @@ toml = "*"
 [dev-packages]
 
 pytest = "*"
-toml = "*"

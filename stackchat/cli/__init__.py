@@ -24,7 +24,7 @@ def main():
 
     if {'--version'} & flags:
         sys.stdout.write("stack.chat dev\n")
-        sys.exit(0)
+        return sys.exit(0)
 
     if {'-q', '--quiet'} & flags:
         logging.getLogger().setLevel(logging.ERROR)
@@ -94,7 +94,7 @@ def main():
             asyncio.get_event_loop().run_until_complete(coro)
     else:
         sys.stderr.write("usage: %s $subcommand [$args...]\n" % (command))
-        sys.exit(1)
+        return sys.exit(1)
 
 
 class Filter(logging.Filter):
