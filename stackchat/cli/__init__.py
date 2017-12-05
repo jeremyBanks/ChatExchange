@@ -22,7 +22,7 @@ def main():
 
     if {'--version'} & flags:
         sys.stdout.write("stack.chat dev\n")
-        sys.exit(1)
+        sys.exit(0)
 
     if {'-q', '--quiet'} & flags:
         logging.getLogger().setLevel(logging.ERROR)
