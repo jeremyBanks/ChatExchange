@@ -21,3 +21,4 @@ aitertools = "*"
 [dev-packages]
 
 pytest = "*"
+toml = "*"
