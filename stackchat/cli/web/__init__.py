@@ -133,7 +133,7 @@ async def main(chat):
 
         html_name = html.escape("room = await chat.server(%r).room(%r) # %s" % (server.slug, room.room_id, room.name))
         html_messages = "\n".join(
-            "<b><a href="/u/%s">%s</a></b>: %s" % (m.owner.user_id, html.escape(m.owner.name), html.escape(m.content_text or m.content_html or m.content_markdown)) for m in messages
+            "<b><a href=\"/u/%s\">%s</a></b>: %s" % (m.owner.user_id, html.escape(m.owner.name), html.escape(m.content_text or m.content_html or m.content_markdown)) for m in messages
         )
 
         return web.Response(content_type='text/html', text=r'''

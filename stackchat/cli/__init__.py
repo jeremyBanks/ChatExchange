@@ -5,6 +5,8 @@ import logging
 import os
 import sys
 
+import toml
+
 import stackchat
 
 
@@ -47,12 +49,41 @@ def main():
 
         logger.debug('command_module == %r', command_module)
 
-        se_email = os.environ.get('STACK_EXCHANGE_EMAIL') or os.environ.get('ChatExchangeU') or ''
-        se_password = os.environ.get('STACK_EXCHANGE_PASSWORD') or os.environ.get('ChatExchangeP') or ''
+        se_email, se_password = None, None
+        
+        try:
+            with open(os.path.expanduser('~/.stack.chat.toml')) as f:
+                global_conf = toml.load(f)
+                logger.debug("read global config: %r", global_conf)
+        except IOError:
+            global_conf = {'credentials': {'stack-exchange': {}}}
+        
+        try:
+            with open('./.stack.chat.toml') as f:
+                local_conf = toml.load(f)
+                logger.debug("read local config: %r", local_conf)
+        except IOError:
+            local_conf = {'credentials': {'stack-exchange': {}}}
 
         if not se_email:
-            se_email = getpass.getpass("stack exchange login email: ")
-            
+            se_email = os.environ.get('STACK_EXCHANGE_EMAIL')
+        if not se_email:
+            se_email = local_conf['credentials']['stack-exchange'].get('email')
+        if not se_email:
+            se_email = global_conf['credentials']['stack-exchange'].get('email')
+        if not se_email:
+            se_email = os.environ.get('ChatExchangeU')
+        if not se_email:
+            se_email = input("stack exchange login email: ")
+
+        if not se_password:
+            se_password = os.environ.get('STACK_EXCHANGE_PASSWORD')
+        if not se_email:
+            se_email = local_conf['credentials']['stack-exchange'].get('password')
+        if not se_email:
+            se_email = global_conf['credentials']['stack-exchange'].get('password')
+        if not se_password:
+            se_password = os.environ.get('ChatExchangeP')
         if not se_password:
             se_password = getpass.getpass("stack exchange password: ")
 

@@ -7,7 +7,7 @@ name = "pypi"
 
 [packages]
 
-SQLAlchemy = "*"
+sqlalchemy = "*"
 lxml = "*"
 "html5lib" = "*"
 hashids = "*"
@@ -16,6 +16,7 @@ aiohttp = "*"
 aiodns = "*"
 cssselect = "*"
 aitertools = "*"
+toml = "*"
 
 
 [dev-packages]
