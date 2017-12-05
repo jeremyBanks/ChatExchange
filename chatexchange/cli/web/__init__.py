@@ -166,7 +166,7 @@ async def main(chat):
         '''.format(**locals()))
 
     logger.info("Creating server.")
-    server = await asyncio.get_event_loop().create_server(app.make_handler(), '127.0.0.1', 8080)
+    server = await asyncio.get_event_loop().create_server(app.make_handler(), '127.0.0.1', int(os.environ.get('PORT') or 8080))
 
     logger.debug("Looping forever while server runs.")
     while True:
