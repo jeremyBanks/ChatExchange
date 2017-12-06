@@ -42,57 +42,6 @@ stack.chat send se 1 "hello world"
 
 
 
-
-
-
-
-# that email address is not registered.
-# would you like to register these credentials [no]?
-yes
-
-# Please enter a display name [Eagfeaa]
-
-
-# registering and hiding 21 accounts
-math.stackexchange.com
-softwareengineering.stackexchange.om
-unix.stackexchange.com
-english.stackexchange.com
-apple.stackexchange.com
-android.stackexchange.com
-stats.stackexchange.com
-codereview.stackexchange.com
-security.stackexchange.com
-physics.stackexchange.com
-tex.stackexchange.com
-electronics.stackexchange.com
-gaming.stackexchange.com
-dba.stackexchange.com
-wordpress.stackexchange.com
-gamedev.stackexchange.com
-ux.stackexchange.com
-gis.stackexchange.com
-graphicdesign.stackexchange.com
-scifi.stackexchange.com
-cs.stackexchange.com
-
-
-
-
-randomly associating one and deleting it. :)
-
-
-
-
-
-
-
-
-
-
-
-
-
 $ stack.chat /se/1 alias sandbox
 E written to ./.stack.chat.toml
 

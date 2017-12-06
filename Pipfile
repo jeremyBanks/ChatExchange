@@ -17,6 +17,7 @@ aiodns = "*"
 cssselect = "*"
 aitertools = "*"
 toml = "*"
+cryptography = "*"
 
 
 [dev-packages]
