@@ -3,9 +3,9 @@ import random
 
 # roughly normalize lengths
 _CONSONANTS = 'BCDFGHJKLMNPQRSTVXZWY' * 1
-_VOWELS =     'AEIOU' * 4
-_DIGITS =     '0123456789' * 2
-_BREAK  =     ' ' * 20
+_VOWELS = 'AEIOU' * 4
+_DIGITS = '0123456789' * 2
+_BREAK  = ' ' * 20
 
 _pairs = {}
 _pairs[' '] = (

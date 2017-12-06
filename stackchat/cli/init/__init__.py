@@ -66,3 +66,10 @@ async def main(config, location='--local'):
     print("You will not be able to participate on chat.stackoverflow.com or")
     print("chat.meta.stackexchange.com until you reach 20 reputation on their")
     print("parent sites.")
+
+
+    while True:
+        print("\nMORE!\n")
+        for _ in range(24):
+            print(names.generate())
+        await asyncio.sleep(12)

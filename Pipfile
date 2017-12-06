@@ -18,6 +18,7 @@ cssselect = "*"
 aitertools = "*"
 toml = "*"
 cryptography = "*"
+docopt = "*"
 
 
 [dev-packages]

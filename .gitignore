@@ -68,4 +68,4 @@ epydocs/
 VEnvs/
 /venv-*
 
-.*.sqlite
+*.sqlite

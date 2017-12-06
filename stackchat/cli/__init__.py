@@ -88,7 +88,7 @@ def main():
         if not se_password:
             se_password = getpass.getpass("stack exchange password: ")
 
-        db_path = 'sqlite:///./.stackchat.sqlite'
+        db_path = 'sqlite:///./.stack.chat.sqlite'
 
         if not no_chat:
             with stackchat.Client(db_path, se_email, se_password) as chat:
