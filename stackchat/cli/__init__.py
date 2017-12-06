@@ -46,6 +46,7 @@ def main():
         logger.debug('flags, subcommand, args == %r, %r, %r', flags, subcommand, subcommand_args)
 
         command_module = importlib.import_module('.' + subcommand, 'stackchat.cli')
+        no_chat = getattr(command_module, 'NO_CHAT', False)
 
         logger.debug('command_module == %r', command_module)
 
@@ -89,9 +90,14 @@ def main():
 
         db_path = 'sqlite:///./.stackchat.sqlite'
 
-        with stackchat.Client(db_path, se_email, se_password) as chat:
-            coro = command_module.main(chat, *subcommand_args)
+        if not no_chat:
+            with stackchat.Client(db_path, se_email, se_password) as chat:
+                coro = command_module.main(chat, *subcommand_args)
+                asyncio.get_event_loop().run_until_complete(coro)
+        else:
+            coro = command_module.main(dict(locals()), *subcommand_args)
             asyncio.get_event_loop().run_until_complete(coro)
+
     else:
         sys.stderr.write("usage: %s $subcommand [$args...]\n" % (command))
         return sys.exit(1)
