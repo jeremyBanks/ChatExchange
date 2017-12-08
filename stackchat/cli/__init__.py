@@ -26,7 +26,7 @@ import os
 import docopt
 import toml
 
-from ..version import __version__
+from .._version import __version__
 from ..client import Client
 
 
