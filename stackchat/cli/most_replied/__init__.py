@@ -33,6 +33,8 @@ async def main(chat, argv):
     ]
 
     for room in await asyncio.gather(*rooms):
+        # iterate through every existing message in the room to make sure we have them
+        # all in our database.
         async for message in room.old_messages():
             pass
 

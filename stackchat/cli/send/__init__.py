@@ -14,8 +14,6 @@ import logging
 
 import docopt
 
-import stackchat
-
 
 
 logger = logging.getLogger(__name__)
@@ -41,6 +39,3 @@ async def main(chat, argv):
                await room.send(message)
             else:
                 break
-
-
-
