@@ -17,8 +17,6 @@ import logging
 
 import docopt
 
-import stackchat
-
 
 
 logger = logging.getLogger(__name__)
