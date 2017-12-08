@@ -2,8 +2,10 @@ image: python:3
 
 test:
   script:
-  - python -m stackchat version
-  - ./test.cmd
+  - pip install pipenv -q
+  - pipenv install --dev
+  - pipenv run python -m stackchat version
+  - pipenv run python -m pytest -v
 
 install:
   script:
