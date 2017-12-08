@@ -1,7 +1,7 @@
 stack.chat
 ==========
 
-stack.chat is a Python 3 library and command-line tool for Stack Exchange chat.
+stack.chat is an unofficial Python 3 library and command-line tool for Stack Exchange chat.
 
 # This README is more aspirational than descriptive, that is to say, this is mostly `NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED`.
 
