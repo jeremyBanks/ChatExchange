@@ -2,17 +2,18 @@ import datetime
 import setuptools
 
 
-from stackchat.version import __version__
+
+with open('stackchat/version.py') as f:
+    # hack to avoid importing and initializing the rest of the package before setup.
+    version = (lambda g={}: [exec(f.read(), {}, g), g][-1])()['__version__']
+
+if version.endswith('.dev'):
+    version += str(int(datetime.datetime.utcnow().timestamp()))
 
 
-
-if __version__.endswith('-dev'):
-    __version__ += str(int(datetime.datetime.utcnow().timestamp()))
-
-
-setup = lambda: setuptools.setup(
+setuptools.setup(
     name='stack.chat',
-    version=__version__,
+    version=version,
     python_requires='>=3',
     install_requires=[
         'SQLAlchemy',
@@ -36,14 +37,11 @@ setup = lambda: setuptools.setup(
     author='Jeremy Banks',
     author_email='_@jeremy.ca',
     license='MIT',
-    packages=['stackchat'],
+    packages=setuptools.find_packages(),
     entry_points={
         'console_scripts': [
             'stack.chat=stackchat.__main__:main',
             'stackchat=stackchat.__main__:main',
         ],
-    })
-
-
-if __name__ == '__main__':
-    setup()
+    },
+)
