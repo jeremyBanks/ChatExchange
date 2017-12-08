@@ -3,3 +3,12 @@ image: python:3
 test:
   script:
   - ./test.cmd
+
+heroku:
+  image: ruby:2.2
+  type: deploy
+  script:
+  - gem install dpl
+  - dpl --provider=heroku --app=stackchat-dev --api-key=$HEROKU_API_KEY
+  only:
+  - master
