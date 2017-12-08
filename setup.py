@@ -2,11 +2,10 @@ import datetime
 import setuptools
 
 
-import toml
+from stackchat.version import __version__
 
 
 
-__version__ = '0.0.1-dev'
 if __version__.endswith('-dev'):
     __version__ += str(int(datetime.datetime.utcnow().timestamp()))
 
@@ -26,6 +25,7 @@ setup = lambda: setuptools.setup(
         'cssselect',
         'aitertools',
         'toml',
+        'docopt',
     ],
     classifiers=[
         'Programming Language :: Python :: 3',

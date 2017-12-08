@@ -1,18 +1,31 @@
+"""
+usage:
+    stack.chat most-replied
+    stack.chat most-replied --help
+    stack.chat --help
+
+This does something!
+"""
+
+
+
 import asyncio
 import itertools
 import logging
 import os
 
+import docopt
 from pprintpp import pprint as print
-
-from stackchat.client import Client
 
 
 
 logger = logging.getLogger(__name__)
 
 
-async def main(chat):
+async def main(chat, argv):
+    opts = docopt.docopt(__doc__.replace('stack.chat', argv[0]), argv[1:], True)
+    logger.debug("subcommand optparse opts: %s" % opts)
+
     rooms = [
         chat.mse.room(89),
         chat.se.room(11540),

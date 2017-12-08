@@ -1,106 +1,125 @@
+"""
+usage:
+    stack.chat [-q|-v] COMMAND [ARGS...]
+    stack.chat COMMAND --help
+    stack.chat --help
+    stack.chat --version
+
+general options:
+    --quiet, -q    Minimal logging output.
+    --verbose, -v  Maximum logging output.
+
+common commands:
+    init    Initialize config and data store with credentials.
+    tail    Display the latest message in a chat room.
+    send    Send a message to a chat room.
+    web     Launch local dev web UI.
+"""
+
+
 import asyncio
 import getpass
 import importlib
 import logging
 import os
-import sys
 
+import docopt
 import toml
 
-import stackchat
+from ..version import __version__
+from ..client import Client
 
 
 
 logger = logging.getLogger(__name__)
 
 
-def main():
-    command, *args = sys.argv
+def main(*argv):
+    opts = docopt.docopt(
+        __doc__.replace('stack.chat', argv[0]),
+        argv[1:],
+        True,
+        "stack.chat version %s" % (__version__),
+        True)
 
-    flags = set()
-    while args and args[0][:1] == '-':
-        flags.add(args[0])
-        args = args[1:]
+    # docopt() will exit when it handles --version and --help for us.
+    # we also alias them as these psuedo-commands.
+    if opts['COMMAND'] == 'version':
+        return main(argv[0], '--version')
+    if opts['COMMAND'] == 'help':
+        command_arg = opts['ARGS'][:1]
+        return main(argv[0], *command_arg, '--help')
 
-    if {'--version'} & flags:
-        sys.stdout.write("stack.chat dev\n")
-        return sys.exit(0)
-
-    if {'-q', '--quiet'} & flags:
-        logging.getLogger().setLevel(logging.ERROR)
-        logging.getLogger('stackchat').setLevel(logging.ERROR)
-    elif {'-v', '--verbose'} & flags:
-        logging.getLogger().setLevel(logging.DEBUG)
-        logging.getLogger('stackchat').setLevel(logging.DEBUG)
+    if opts['--quiet']:
+        level = logging.ERROR
+    elif opts['--verbose']:
+        level = logging.DEBUG
     else:
-        logging.getLogger().setLevel(logging.WARNING)
-        logging.getLogger('stackchat').setLevel(logging.DEBUG)
+        level = logging.WARNING
 
-    logging.basicConfig(format="%(e)32s %(relative)6s ms%(n)s%(levelled_name)32s %(message)s", level=logging.DEBUG)
+    logging.basicConfig(format="%(e)32s %(relative)6s ms%(n)s%(levelled_name)32s %(message)s", level=level)
     for handler in logging.getLogger().handlers:
         handler.addFilter(Filter())
 
-    if args:
-        subcommand, *subcommand_args = args
+    logger.debug("optparse opts: %s" % opts)
 
-        logger.debug('flags, subcommand, args == %r, %r, %r', flags, subcommand, subcommand_args)
+    subcommand = opts['COMMAND']
 
-        command_module = importlib.import_module('.' + subcommand, 'stackchat.cli')
-        no_chat = getattr(command_module, 'NO_CHAT', False)
+    command_module = importlib.import_module('.' + subcommand, 'stackchat.cli')
+    no_chat = getattr(command_module, 'NO_CHAT', False)
 
-        logger.debug('command_module == %r', command_module)
+    logger.debug('command_module == %r', command_module)
 
-        se_email, se_password = None, None
-        
-        try:
-            with open(os.path.expanduser('~/.stack.chat.toml')) as f:
-                global_conf = toml.load(f)
-                logger.debug("read global config: %r", global_conf)
-        except IOError:
-            global_conf = {'credentials': {'stack-exchange': {}}}
-        
-        try:
-            with open('./.stack.chat.toml') as f:
-                local_conf = toml.load(f)
-                logger.debug("read local config: %r", local_conf)
-        except IOError:
-            local_conf = {'credentials': {'stack-exchange': {}}}
+    se_email, se_password = None, None
+    
+    try:
+        with open(os.path.expanduser('~/.stack.chat.toml')) as f:
+            global_conf = toml.load(f)
+            logger.debug("read global config: %r", global_conf)
+    except IOError:
+        global_conf = {'credentials': {'stack-exchange': {}}}
+    
+    try:
+        with open('./.stack.chat.toml') as f:
+            local_conf = toml.load(f)
+            logger.debug("read local config: %r", local_conf)
+    except IOError:
+        local_conf = {'credentials': {'stack-exchange': {}}}
 
-        if not se_email:
-            se_email = os.environ.get('STACK_EXCHANGE_EMAIL')
-        if not se_email:
-            se_email = local_conf['credentials']['stack-exchange'].get('email')
-        if not se_email:
-            se_email = global_conf['credentials']['stack-exchange'].get('email')
-        if not se_email:
-            se_email = os.environ.get('ChatExchangeU')
-        if not se_email:
-            se_email = input("stack exchange login email: ")
+    if not se_email:
+        se_email = os.environ.get('STACK_EXCHANGE_EMAIL')
+    if not se_email:
+        se_email = local_conf['credentials']['stack-exchange'].get('email')
+    if not se_email:
+        se_email = global_conf['credentials']['stack-exchange'].get('email')
+    if not se_email:
+        se_email = os.environ.get('ChatExchangeU')
+    if not se_email:
+        se_email = input("stack exchange login email: ")
 
-        if not se_password:
-            se_password = os.environ.get('STACK_EXCHANGE_PASSWORD')
-        if not se_email:
-            se_email = local_conf['credentials']['stack-exchange'].get('password')
-        if not se_email:
-            se_email = global_conf['credentials']['stack-exchange'].get('password')
-        if not se_password:
-            se_password = os.environ.get('ChatExchangeP')
-        if not se_password:
-            se_password = getpass.getpass("stack exchange password: ")
+    if not se_password:
+        se_password = os.environ.get('STACK_EXCHANGE_PASSWORD')
+    if not se_email:
+        se_email = local_conf['credentials']['stack-exchange'].get('password')
+    if not se_email:
+        se_email = global_conf['credentials']['stack-exchange'].get('password')
+    if not se_password:
+        se_password = os.environ.get('ChatExchangeP')
+    if not se_password:
+        se_password = getpass.getpass("stack exchange password: ")
 
-        db_path = 'sqlite:///./.stack.chat.sqlite'
+    db_path = 'sqlite:///./.stack.chat.sqlite'
 
-        if not no_chat:
-            with stackchat.Client(db_path, se_email, se_password) as chat:
-                coro = command_module.main(chat, *subcommand_args)
-                asyncio.get_event_loop().run_until_complete(coro)
-        else:
-            coro = command_module.main(dict(locals()), *subcommand_args)
+    # re-construct without flags we handle above
+    sub_argv = [argv[0], subcommand, *opts['ARGS']]
+
+    if not no_chat:
+        with Client(db_path, se_email, se_password) as chat:
+            coro = command_module.main(chat, sub_argv)
             asyncio.get_event_loop().run_until_complete(coro)
-
     else:
-        sys.stderr.write("usage: %s $subcommand [$args...]\n" % (command))
-        return sys.exit(1)
+        coro = command_module.main(dict(locals()), sub_argv)
+        asyncio.get_event_loop().run_until_complete(coro)
 
 
 class Filter(logging.Filter):

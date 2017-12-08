@@ -11,12 +11,6 @@ A Python 3 library and command-line tool for Stack Exchange chat.
 pip install stack.chat  # or your Python 3 packaging alternative of choice
 ```
 
-## Authentication
-
-For authenticated use specify a Stack Exchange email address and password in
-the `STACK_EXCHANGE_EMAIL` and `STACK_EXCHANGE_PASSWORD` environment variables.
-OpenID and OAuth authentication are not supported.
-
 ### Examples
 
 ```

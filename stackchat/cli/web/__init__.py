@@ -1,3 +1,13 @@
+"""
+usage:
+    stack.chat web
+    stack.chat web --help
+    stack.chat --help
+
+Runs the local dev web server.
+"""
+
+
 import asyncio
 import itertools
 import asyncio
@@ -8,13 +18,17 @@ import html
 
 from aitertools import alist, islice as aislice
 from aiohttp import web
+import docopt
 
 
 
 logger = logging.getLogger(__name__)
 
 
-async def main(chat):
+async def main(chat, argv):
+    opts = docopt.docopt(__doc__.replace('stack.chat', argv[0]), argv[1:], True, False)
+    logger.debug("subcommand optparse opts: %s" % opts)
+
     app = web.Application()
     get = lambda route: lambda f: [app.router.add_get(route, f), f][-1]
 

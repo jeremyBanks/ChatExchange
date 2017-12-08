@@ -1,11 +1,25 @@
+"""
+usage:
+    stack.chat init [--global] [--email=EMAIL] [--password=PASSWORD]
+    stack.chat init --help
+    stack.chat --help
+
+Interactively initializes the stack.chat config and data store, either
+locally (in the current directory) or globally (in the home directory).
+"""
+
+
 import asyncio
 import logging
 import random
 
-import stackchat
+import docopt
 
 from . import names
 
+
+
+logger = logging.getLogger(__name__)
 
 
 NO_CHAT = True
@@ -22,7 +36,12 @@ random.shuffle(SE_HOSTS)
 SE_HOSTS = SE_HOSTS[:random.randint(21, len(SE_HOSTS))]
 
 
-async def main(config, location='--local'):
+async def main(config, argv):
+    opts = docopt.docopt(__doc__.replace('stack.chat', argv[0]), argv[1:], True)
+    logger.debug("subcommand optparse opts: %s" % opts)
+
+    location = '--local' if not opts['--global'] else '--global'
+
     se_email = config['se_email']
     se_password = config['se_password']
     db_path = config['db_path']
