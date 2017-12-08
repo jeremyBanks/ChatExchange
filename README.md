@@ -262,5 +262,5 @@ be dual licensed as above, without any additional terms or conditions.
 ### Contributors
 
 Please see the Git commit history or 
-https://github.com/Manishearth/stackchat/contributors and
-https://gitlab.com/stack.chat/stack.chat/graphs/master.
+https://github.com/jeremyBanks/stack.chat/contributors and 
+https://github.com/Manishearth/ChatExchange/contributors.
