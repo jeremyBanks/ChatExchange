@@ -5,6 +5,21 @@ import setuptools
 
 
 
+DEPENDENCIES = [
+    'SQLAlchemy',
+    'lxml',
+    'html5lib',
+    'hashids',
+    'pprintpp',
+    'aiohttp',
+    'aiodns',
+    'cssselect',
+    'aitertools',
+    'toml',
+    'docopt',
+]
+
+
 def _read(name):
     with open(os.path.join(os.path.dirname(__file__), name), 'rt', encoding='utf-8') as f:
         return f.read()
@@ -30,19 +45,7 @@ def setup():
         description=one_sentence,
         long_description=None, # wait until the readme is less awful
         python_requires='>=3',
-        install_requires=[
-            'SQLAlchemy',
-            'lxml',
-            'html5lib',
-            'hashids',
-            'pprintpp',
-            'aiohttp',
-            'aiodns',
-            'cssselect',
-            'aitertools',
-            'toml',
-            'docopt',
-        ],
+        install_requires=DEPENDENCIES,
         classifiers=[
             'Programming Language :: Python :: 3',
             'License :: OSI Approved :: Apache Software License',
