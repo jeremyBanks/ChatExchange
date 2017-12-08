@@ -1,6 +1,7 @@
 image: python:3
 
 test:
+  stage: testing
   script:
   - pip install pipenv -q
   - pipenv install --dev
@@ -8,13 +9,14 @@ test:
   - pipenv run python -m pytest -v
 
 install:
+  stage: testing
   script:
   - pip install .
   - stack.chat version
 
 heroku:
+  stage: deploy
   image: ruby:2.2
-  type: deploy
   script:
   - gem install dpl
   - dpl --provider=heroku --app=stackchat-dev --api-key=$HEROKU_API_KEY
