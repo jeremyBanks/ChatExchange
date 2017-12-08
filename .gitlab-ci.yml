@@ -2,7 +2,13 @@ image: python:3
 
 test:
   script:
+  - python -m stackchat version
   - ./test.cmd
+
+install:
+  script:
+  - pip install .
+  - stack.chat version
 
 heroku:
   image: ruby:2.2
