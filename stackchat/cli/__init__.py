@@ -99,10 +99,10 @@ def main(*argv):
 
     if not se_password:
         se_password = os.environ.get('STACK_EXCHANGE_PASSWORD')
-    if not se_email:
-        se_email = local_conf['credentials']['stack-exchange'].get('password')
-    if not se_email:
-        se_email = global_conf['credentials']['stack-exchange'].get('password')
+    if not se_password:
+        se_password = local_conf['credentials']['stack-exchange'].get('password')
+    if not se_password:
+        se_password = global_conf['credentials']['stack-exchange'].get('password')
     if not se_password:
         se_password = os.environ.get('ChatExchangeP')
     if not se_password:
