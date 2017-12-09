@@ -43,7 +43,7 @@ def setup():
         name=name,
         version=version,
         description=one_sentence,
-        long_description=None, # wait until the readme is less awful
+        long_description=readme,
         python_requires='>=3',
         install_requires=DEPENDENCIES,
         classifiers=[
