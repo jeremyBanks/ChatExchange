@@ -36,10 +36,7 @@ random.shuffle(SE_HOSTS)
 SE_HOSTS = SE_HOSTS[:random.randint(21, len(SE_HOSTS))]
 
 
-async def main(config, argv):
-    opts = docopt.docopt(__doc__.replace('stack.chat', argv[0]), argv[1:], True)
-    logger.debug("subcommand optparse opts: %s" % opts)
-
+async def main(config, opts):
     location = '--local' if not opts['--global'] else '--global'
 
     se_email = config['se_email']

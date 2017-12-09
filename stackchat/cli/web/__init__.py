@@ -25,10 +25,7 @@ import docopt
 logger = logging.getLogger(__name__)
 
 
-async def main(chat, argv):
-    opts = docopt.docopt(__doc__.replace('stack.chat', argv[0]), argv[1:], True, False)
-    logger.debug("subcommand optparse opts: %s" % opts)
-
+async def main(chat, opts):
     app = web.Application()
     get = lambda route: lambda f: [app.router.add_get(route, f), f][-1]
 

@@ -3,8 +3,6 @@ stack.chat
 
 stack.chat is an unofficial Python 3 library and command-line tool for Stack Exchange chat.
 
-# This README is more aspirational than descriptive, that is to say, this is mostly `NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED NOT IMPLEMENTED`.
-
 
 ## Installation
 
@@ -15,43 +13,6 @@ pip install stack.chat  # or your Python 3 packaging alternative of choice
 ### Examples
 
 ```
-
-$ stack.chat init [--global else --local]
-E email:
-E password:
-E verifying credentials...
-E created ./stack.chat.sqlite    # global names are dotfiles instead
-E created ./stack.chat.toml
-
-# it works without init, but init creates the config that uses the database, else it defaults to in-memory sqlite.
-
-
-
-
-
-
-
-stack.chat send se 1 "hello world"
-
-
-
-
-
-$ stack.chat /se/1 alias sandbox
-E written to ./.stack.chat.toml
-
-$ stack.chat sandbox send "hello world"
-E sent
-
-$ stack.chat sandbox follow
-E # 2017-12-05T22:31Z
-E b Joe#124313: lol what
-E c Tim#146: I don't like it
-E d Bob#123: hello world
-E # 2017-12-05T22:32Z
-E e Tim: oh darn it's a bot
-^C
-
 $ stack.chat sandbox reply e "that's enough of that!"
 
 

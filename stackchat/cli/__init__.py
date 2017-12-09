@@ -65,10 +65,10 @@ def main(*argv):
 
     subcommand = opts['COMMAND']
 
-    command_module = importlib.import_module('.' + subcommand, 'stackchat.cli')
-    no_chat = getattr(command_module, 'NO_CHAT', False)
+    subcommand_module = importlib.import_module('.' + subcommand, 'stackchat.cli')
+    no_chat = getattr(subcommand_module, 'NO_CHAT', False)
 
-    logger.debug('command_module == %r', command_module)
+    logger.debug('subcommand_module == %r', subcommand_module)
 
     se_email, se_password = None, None
     
@@ -113,12 +113,22 @@ def main(*argv):
     # re-construct without flags we handle above
     sub_argv = [argv[0], subcommand, *opts['ARGS']]
 
+    if getattr(subcommand_module, '__doc__', None):
+        sub_opts = docopt.docopt(
+            subcommand_module.__doc__.replace('stack.chat', argv[0]),
+            argv[1:],
+            True,
+            False)
+        logger.debug("subcommand optparse opts: %s" % opts)
+    else:
+        sub_opts = None
+
     if not no_chat:
         with Client(db_path, se_email, se_password) as chat:
-            coro = command_module.main(chat, sub_argv)
+            coro = subcommand_module.main(chat, sub_opts)
             asyncio.get_event_loop().run_until_complete(coro)
     else:
-        coro = command_module.main(dict(locals()), sub_argv)
+        coro = subcommand_module.main(dict(locals()), sub_opts)
         asyncio.get_event_loop().run_until_complete(coro)
 
 

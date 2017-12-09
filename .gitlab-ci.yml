@@ -1,7 +1,7 @@
 image: python:3
 
 test:
-  stage: testing
+  stage: test
   script:
   - pip install pipenv -q
   - pipenv install --dev
@@ -9,7 +9,7 @@ test:
   - pipenv run python -m pytest -v
 
 install:
-  stage: testing
+  stage: test
   script:
   - pip install .
   - stack.chat version

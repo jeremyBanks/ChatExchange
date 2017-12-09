@@ -22,10 +22,7 @@ from pprintpp import pprint as print
 logger = logging.getLogger(__name__)
 
 
-async def main(chat, argv):
-    opts = docopt.docopt(__doc__.replace('stack.chat', argv[0]), argv[1:], True)
-    logger.debug("subcommand optparse opts: %s" % opts)
-
+async def main(chat, opts):
     rooms = [
         chat.mse.room(89),
         chat.se.room(11540),

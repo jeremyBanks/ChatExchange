@@ -10,7 +10,7 @@ command options:
     --num, -n     Number of recent messages to show. [default: 10]
     --follow, -f
 """
-
+# stack.chat tail [-n=N] [-f] SERVER ROOM_ID
 
 import asyncio
 import logging
@@ -22,10 +22,7 @@ import docopt
 logger = logging.getLogger(__name__)
 
 
-async def main(chat, argv):
-    opts = docopt.docopt(__doc__.replace('stack.chat', argv[0]), argv[1:], True)
-    logger.debug("subcommand optparse opts: %s" % opts)
-
+async def main(chat, opts):
     server_slug = opts['SERVER']
     room_id = int(opts['ROOM_ID'])
 
