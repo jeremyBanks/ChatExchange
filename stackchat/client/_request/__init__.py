@@ -185,6 +185,19 @@ class RoomMessages(_Request):
                     self.messages.append(message)
 
 
+class SendMessage(_Request):
+    method = 'POST'
+
+    def _make_path(self, room_id):
+        self.room_id = int(room_id)
+        return f'chats/{room_id}/messages/new'
+
+    def _make_data(self, text, fkey):
+        return {
+            'text': text,
+            'fkey': fkey
+        }
+
 
 class TranscriptDay(_Request):
     method = 'GET'

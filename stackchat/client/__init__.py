@@ -363,8 +363,17 @@ class Room(models.Room):
 
                             yield message
 
-    def send(self, content_markdown):
-        raise NotImplementedError()
+    async def send_message(self, content_markdown):
+        await self._server._client._authenticated
+
+        response = await _request.SendMessage.request(
+            self._server._client,
+            self._server,
+            room_id=self.room_id
+        )
+        
+        assert response.id # handle failure for real once we've figured out how to succeed
+            
 
 
 class Message(models.Message):

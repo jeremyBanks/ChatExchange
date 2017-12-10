@@ -27,11 +27,11 @@ async def main(chat, opts):
     messages = opts['MESSAGES']
     if messages:
         for message in messages:
-            await room.send(message)
+            await room.send_message(message)
     else:
         while True:
             message = input('> ').strip()
             if message:
-               await room.send(message)
+               await room.send_message(message)
             else:
                 break
