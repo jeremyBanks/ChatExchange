@@ -115,10 +115,11 @@ def main(*argv):
 
     if getattr(subcommand_module, '__doc__', None):
         sub_opts = docopt.docopt(
-            subcommand_module.__doc__.replace('stack.chat', argv[0]),
-            argv[1:],
-            True,
-            False)
+            doc=subcommand_module.__doc__.replace('stack.chat', argv[0]),
+            argv=sub_argv[1:],
+            help=True,
+            version=None,
+            options_first=False)
         logger.debug("subcommand optparse opts: %s" % opts)
     else:
         sub_opts = None
