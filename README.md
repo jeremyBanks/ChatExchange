@@ -20,7 +20,7 @@ Contributors who clone this repo can install our dev packages with pipenv:
 
 ```
 pip install pipenv
-pipenv install
+pipenv install --dev
 ```
 
 ## Usage
