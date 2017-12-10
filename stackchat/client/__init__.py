@@ -367,7 +367,8 @@ class Room(models.Room):
         response = await _request.SendMessage.request(
             self._server._client,
             self._server,
-            room_id=self.room_id
+            room_id=self.room_id,
+            text=content_markdown
         )
         
         assert response.id # handle failure for real once we've figured out how to succeed
