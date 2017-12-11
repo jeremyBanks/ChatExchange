@@ -4,11 +4,13 @@ stack.chat
 stack.chat is an unofficial Python 3 library and command-line tool
 for [Stack Exchange chat](https://chat.stackexchange.com/faq).
 
-links:
-[stack.chat](https://stack.chat),
-[github/jeremyBanks/stack.chat](https://github.com/jeremyBanks/stack.chat),
-[pypi/stack.chat](https://pypi.python.org/pypi/stack.chat),
-[stackapps.com/q/7710](https://stackapps.com/q/7710)
+### Links ###
+
+- [stack.chat](https://stack.chat)
+- [github/jeremyBanks/stack.chat](https://github.com/jeremyBanks/stack.chat)
+- [pypi/stack.chat](https://pypi.python.org/pypi/stack.chat)
+- [stackapps.com/q/7710](https://stackapps.com/q/7710)
+
 
 
 Installation
