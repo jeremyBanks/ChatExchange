@@ -1,8 +1,14 @@
 stack.chat
 ==========
 
-stack.chat is an unofficial Python 3 library and command-line tool for Stack Exchange chat.
+stack.chat is an unofficial Python 3 library and command-line tool
+for [Stack Exchange chat](https://chat.stackexchange.com/faq).
 
+links:
+[stack.chat](https://stack.chat),
+[github/jeremyBanks/stack.chat](https://github.com/jeremyBanks/stack.chat),
+[pypi/stack.chat](https://pypi.python.org/pypi/stack.chat),
+[stackapps.com/q/7710](https://stackapps.com/q/7710)
 
 
 Installation
@@ -24,7 +30,7 @@ Contributors who clone this repo can install our dev packages with pipenv:
 Usage
 -----
 
-There are no docs. You may want to look at [stackchat/cli/](stackchat/cli/).
+There are no docs. You may want to look in `stackchat/cli/`.
 
 ### Python ###
 
@@ -32,11 +38,11 @@ There are no docs. You may want to look at [stackchat/cli/](stackchat/cli/).
 
 ### CLI ###
 
-    python3 -m stackchat help
+    stack.chat help
 
 or
 
-    stack.chat help
+    python3 -m stackchat help
 
 
 
@@ -52,12 +58,12 @@ at your option.
 
 ### Contribution ###
 
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, as defined in the Apache-2.0 license, shall
-be dual licensed as above, without any additional terms or conditions.
+Unless you explicitly state otherwise, any contribution intentionally
+submitted for inclusion in the work by you, as defined in the Apache
+License, Version 2.0, shall be dual licensed as above, without any
+additional terms or conditions.
 
 ### Contributors ###
 
-Please see the Git commit history or 
-https://github.com/jeremyBanks/stack.chat/contributors and 
-https://github.com/Manishearth/ChatExchange/contributors.
+Please see the Git commit history or
+[this list on GitHub](https://github.com/jeremyBanks/stack.chat/contributors).
