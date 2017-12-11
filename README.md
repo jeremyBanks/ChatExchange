@@ -3,9 +3,6 @@ stack.chat
 
 stack.chat is an unofficial Python 3 library and command-line tool for Stack Exchange chat.
 
-- https://stack.chat
-- https://pypi.python.org/pypi/stack.chat
-
 
 
 Installation

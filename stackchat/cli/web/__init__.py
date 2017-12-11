@@ -11,15 +11,17 @@ Runs the local dev web server.
 import asyncio
 import itertools
 import asyncio
+import html
 import logging
 import os
 import re
-import html
+import textwrap
 
 from aitertools import alist, islice as aislice
 from aiohttp import web
 import docopt
 
+from ..._version import __version__
 
 
 logger = logging.getLogger(__name__)
@@ -31,25 +33,37 @@ async def main(chat, opts):
 
     @get(r'/')
     async def index(request):
+        # handle explicit oneboxing as image with `!https://stack.chat`
         if request.headers.getall('ACCEPT', [''])[0].lower().startswith('image/'):
-            return web.Response(content_type='image/svg+xml', text=
+            s = "stack.chat version %s" % (__version__)
+
+            lines = textwrap.wrap(s, width=42, subsequent_indent='  ')[:16]
+
+            height = 18 * len(lines)
+
+            parts = [
                 '<?xml version="1.0" encoding="utf-8"?>'
                 '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" baseProfile="full"'
-                    ' width="256" height="32">'
+                    ' width="300" height="%s">'
                 '<style>text{'
-                    'stroke-width:6px;'
-                    'font-weight:bold;'
-                    'font-size:24px;'
-                    'font-family:monospace;'
-                '}</style>'
-                '<text x="4" y="28" text-anchor="start" style="'
-                    'fill:white;'
-                    'stroke:black;'
-                '">stack.chat</text>'
-                '<text x="4" y="28" text-anchor="start" style="'
-                    'fill:white;'
-                '">stack.chat</text>'
-                '</svg>')
+                    'fill:black;'
+                    'stroke:#fbf2d9;'
+                    'font-size:12px;'
+                    'font-family:Consolas,monospace;'
+                '}</style>' % (height)
+            ]
+
+            for i, line in enumerate(lines):
+                y = 15 + 18 * i
+                h = html.escape(line)
+                parts.append(
+                    '<text x="0" y="%s" text-anchor="start" style="stroke-width:2px;">%s</text>'
+                    '<text x="0" y="%s" text-anchor="start" style="stroke-width:0;">%s</text>' % (y, h, y, h)
+                )
+
+            parts.append('</svg>')
+
+            return web.Response(content_type='image/svg+xml', text=''.join(parts))
 
         return web.Response(content_type='text/html', text=r'''
             <!doctype html>
