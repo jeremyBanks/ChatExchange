@@ -1,0 +1,4 @@
+#!/bin/bash -exu
+pip install pipenv;
+pipenv install;
+pipenv run python -m stackchat "$@";

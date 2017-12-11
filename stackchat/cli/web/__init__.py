@@ -31,6 +31,26 @@ async def main(chat, opts):
 
     @get(r'/')
     async def index(request):
+        if request.headers.getall('ACCEPT', [''])[0].lower().startswith('image/'):
+            return web.Response(content_type='image/svg+xml', text=
+                '<?xml version="1.0" encoding="utf-8"?>'
+                '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" baseProfile="full"'
+                    ' width="256" height="32">'
+                '<style>text{'
+                    'stroke-width:6px;'
+                    'font-weight:bold;'
+                    'font-size:24px;'
+                    'font-family:monospace;'
+                '}</style>'
+                '<text x="4" y="28" text-anchor="start" style="'
+                    'fill:white;'
+                    'stroke:black;'
+                '">stack.chat</text>'
+                '<text x="4" y="28" text-anchor="start" style="'
+                    'fill:white;'
+                '">stack.chat</text>'
+                '</svg>')
+
         return web.Response(content_type='text/html', text=r'''
             <!doctype html>
             <title>-m stackchat web</title>

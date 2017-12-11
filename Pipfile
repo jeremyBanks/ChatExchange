@@ -1,15 +1,20 @@
 [[source]]
 
+name = "pypi"
 url = "https://pypi.python.org/simple"
 verify_ssl = true
-name = "pypi"
+
+
+[requires]
+
+python_version = '3.6'
 
 
 [packages]
 
 sqlalchemy = "*"
 lxml = "*"
-"html5lib" = "*"
+html5lib = "*"
 hashids = "*"
 pprintpp = "*"
 aiohttp = "*"
