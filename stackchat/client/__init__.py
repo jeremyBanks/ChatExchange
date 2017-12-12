@@ -371,7 +371,18 @@ class Room(models.Room):
             text=content_markdown
         )
         
-        assert response.id # handle failure for real once we've figured out how to succeed
+        if response._text['id']: 
+            #do something
+            with self_server_client.sql_session() as sql:
+                # message = self._server._get_or_create_message(sql, response._text['id'])
+                # message.mark_updated()
+                # message.content_text = content_markdown
+                # owner = self._server._get_or_create_user(sql, response._text['id'])
+                # owner.mark_updated()
+                # owner.name = 
+                print('HELLO WORLD')
+        else:
+            raise ValueError(f'POST to room {self.room_id} failed.')
             
 
 

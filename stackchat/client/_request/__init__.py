@@ -59,6 +59,7 @@ class _Request:
             data = dict(self._request_data)
             if self._server:
                 data.setdefault('fkey', (await self._server._fkey_request).fkey)
+            
             request = self._client._web_session.post(self.url, data=data)
         else:
             raise ValueError('invalid .method')
@@ -193,8 +194,11 @@ class SendMessage(_Request):
         return f'chats/{room_id}/messages/new'
 
     def _make_data(self, room_id, text):
+        self.text = text
         return {'text': text}
 
+    def _load(self):
+        self.data = parse.ParseJSON(self._text)
 
 class TranscriptDay(_Request):
     method = 'GET'
