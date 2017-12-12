@@ -29,24 +29,57 @@ Contributors who clone this repo can install our dev packages with pipenv:
 
 
 
-Usage
------
-
-There are no docs. You may want to look in `stackchat/cli/`.
-
-### Python ###
-
-    import stackchat
+Basic Usage
+-----------
 
 ### CLI ###
 
-    stack.chat help
+The default config uses a temporary in-memory database and requires your
+Stack Exchange credentials to be provided through environment variables.
+We can see this by checking the current config with `stack.chat config`.
 
-or
+    $ stack.chat config
+    # the default config should appear
 
-    python3 -m stackchat help
+We'll want to use `stack.chat init --global` to remember our credentials
+and create a persistent local database.
 
+    $ stack.chat init --global
+    # TODO: what happens here?
+    # seeding database...
 
+    $ stack.chat config
+    #
+
+We can confirm it worked with TODO:
+
+    $ stack.chat whoami --server=se
+
+You can read the latest messages in a chat room with `stack.chat tail`.
+
+    $ stack.chat tail --server=se --room=1
+    # TODO
+
+Certain common parameters, such as `--server` and `--room`, will be
+saved and used as the default if you omit that parameter the next time
+you run the command. TODO
+
+    $ stack.chat tail --since-last --follow
+    #
+    ^C
+
+Let's TODO!
+
+    $ stack.chat send "hello, world"
+    #
+
+More details are available from the application itself.
+
+    $ stack.chat help
+
+### Python ###
+
+The Python interface is not yet stable.
 
 License
 -------
