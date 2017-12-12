@@ -41,8 +41,15 @@ def read():
             'db': 'sqlite:///:memory:',
         },
         'state': {
-            'room-last-tailed': {
-                '0': 0,
+            'params': {
+                '--server': 'se',
+                '--room': '70095',
+                '--user': '-2',
+            },
+            'room-tailed-times': {
+                'se': {},
+                'so': {},
+                'mse': {},
             },
         },
     })

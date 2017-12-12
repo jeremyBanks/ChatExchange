@@ -41,8 +41,8 @@ We can see this by checking the current config with `stack.chat config`.
     $ stack.chat config
     # the default config should appear
 
-We'll want to use `stack.chat init --global` to remember our credentials
-and create a persistent local database.
+Instead, we'll want to use `stack.chat init --global` to remember our
+credentials and create a persistent local database.
 
     $ stack.chat init --global
     # TODO: what happens here?
@@ -62,7 +62,7 @@ You can read the latest messages in a chat room with `stack.chat tail`.
 
 Certain common parameters, such as `--server` and `--room`, will be
 saved and used as the default if you omit that parameter the next time
-you run the command. TODO
+it's *required* for a command. TODO
 
     $ stack.chat tail --since-last --follow
     #
