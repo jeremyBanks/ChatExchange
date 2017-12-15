@@ -1,6 +1,7 @@
 from aitertools import alist, islice as aislice
 import textwrap
 import html
+import mimetypes
 import os.path
 
 from aiohttp import web
@@ -29,7 +30,13 @@ _templates = django.template.Engine(
 )
 
 
-def render(template_name, context_data={}, content_type='text/html'):
+def render(template_name, context_data={}, content_type=None):
+    if content_type == None:
+        content_type, _  = mimetypes.guess_type(template_name, strict=False)
+
+    if content_type == None:
+        content_type = 'text/plain'
+
     context_data = dict(context_data)
     context_data.setdefault('stackchat_version', __version__)
     context = django.template.Context(context_data)
@@ -41,43 +48,31 @@ def render(template_name, context_data={}, content_type='text/html'):
 @_get(r'/')
 async def index(chat, request):
     # handle explicit oneboxing as image with `!https://stack.chat`
-    if request.headers.getall('ACCEPT', [''])[0].lower().startswith('image/'):
+    if True or request.headers.getall('ACCEPT', [''])[0].lower().startswith('image/'):
         s = "stack.chat version %s" % (__version__)
 
-        lines = textwrap.wrap(s, width=42, subsequent_indent='  ')[:16]
+        total_width_px = 300
+        line_height_px = 18
+        text_width_chars = 42
+        text_height_chars = 16
 
-        height = 18 * len(lines)
+        lines = textwrap.wrap(s, width=text_width_chars, subsequent_indent='  ')[:text_height_chars]
 
-        parts = [
-            '<?xml version="1.0" encoding="utf-8"?>'
-            '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" baseProfile="full"'
-                ' width="300" height="%s">'
-            '<style>text{'
-                'fill:black;'
-                'stroke:#fbf2d9;'
-                'font-size:12px;'
-                'font-family:Consolas,monospace;'
-            '}</style>' % (height)
-        ]
-
-        for i, line in enumerate(lines):
-            y = 15 + 18 * i
-            h = html.escape(line)
-            parts.append(
-                '<text x="0" y="%s" text-anchor="start" style="stroke-width:2px;">%s</text>'
-                '<text x="0" y="%s" text-anchor="start" style="stroke-width:0;">%s</text>' % (y, h, y, h)
-            )
-
-        parts.append('</svg>')
-
-        return web.Response(content_type='image/svg+xml', text=''.join(parts))
+        return render('index.svg', {
+            'width': total_width_px,
+            'height': 18 * len(lines),
+            'lines': [{
+                'y': 15 + 18 * i,
+                'text': text
+            } for i, text in enumerate(lines)]
+        })
 
     return render('index.html')
 
 
 @_get(r'/style.css')
 async def css(chat, request):
-    return render('style.css', content_type='text/css')
+    return render('style.css')
 
 
 @_get(r'/{slug:[a-z]+}')

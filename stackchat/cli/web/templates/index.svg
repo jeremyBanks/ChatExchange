@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" baseProfile="full" width="{{ width }}" height="{{ height }}">
+<style>
+    text {
+        fill: black;
+        stroke: #fbf2d9;
+        font-size: 12px;
+        font-family: Consolas, monospace;
+    }
+</style>
+{% for line in lines %}
+    <text x="0" y="{{ line.y }}" text-anchor="start" style="stroke-width: 2px;">{{ line.text }}</text>
+    <text x="0" y="{{ line.y }}" text-anchor="start" style="stroke-width: 0;">{{ line.text }}</text>
+{% endfor %}
+</svg>
