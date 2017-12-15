@@ -54,9 +54,9 @@ async def index(chat, request):
     # handle explicit oneboxing as image
     if request.headers.getall('ACCEPT', [''])[0].lower().startswith('image/'):
         lines = [
-            f'!{request.scheme}://{request.host}',
+            f'!{request.headers.get('X-Forwarded-Proto') or request.scheme}://{request.host}',
             f'# stack.chat version {__version__}',
-            f'# up since {_init_datetime.isoformat()}'
+            f'# up since {_init_datetime.isoformat()}Z'
         ]
 
         total_width_px = 300
