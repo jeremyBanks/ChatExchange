@@ -1,0 +1,26 @@
+<!doctype html>
+<title>-m stackchat web</title>
+<link rel="stylesheet" href="/style.css" />
+
+<p>
+    import stackchat<br />
+    from aitertools import alist, islice as aislice
+</p>
+
+<h1>with stackchat.Client(…) as chat:</h1>
+
+<h2>{{ html_name }}</h2>
+
+<h3>room.send(</h3>
+
+<form method="POST">
+    "<input name="content_markdown" placeholder="Hello, world." />"<button type="submit">) # send</button>
+</form>
+
+<h3>messages = await alist(aislice(room.old_messages(), 0, 5))</h3>
+
+<pre>{{ html_messages }}</pre>
+
+<h3>async for message in aislice(room.new_messages(), 0, 5):</h3>
+
+<pre>NotImplemented</pre>

@@ -1,0 +1,13 @@
+<!doctype html>
+<title>-m stackchat web</title>
+<link rel="stylesheet" href="/style.css" />
+
+<p>
+    import stackchat # .__version__ == {{ stackchat_version|stringformat:'r' }}
+</p>
+
+<h1>with stackchat.Client(...) as chat:</h1>
+
+<p><a href="/se">chat.server("se") # Stack Exchange</a></p>
+<p><a href="/so">chat.server("so") # Stack Overflow</a></p>
+<p><a href="/mse">chat.server("mse") # Meta Stack Exchange</a></p>

@@ -14,17 +14,38 @@ import asyncio
 import html
 import logging
 import os
+import os.path
 import re
 import textwrap
 
 from aitertools import alist, islice as aislice
 from aiohttp import web
+import django.template
+import django.utils.html
 import docopt
 
 from ..._version import __version__
 
 
 logger = logging.getLogger(__name__)
+
+
+_templates = django.template.Engine(
+    dirs=[
+        os.path.join(os.path.dirname(__file__), 'templates'),
+    ],
+    debug=True,
+    libraries={},
+)
+
+
+def render(template_name, context_data={}, content_type='text/html'):
+    context_data = dict(context_data)
+    context_data.setdefault('stackchat_version', __version__)
+    context = django.template.Context(context_data)
+    template = _templates.get_template(template_name)
+    rendered = template.render(context)
+    return web.Response(content_type=content_type, text=rendered)
 
 
 async def main(chat, opts):
@@ -65,83 +86,11 @@ async def main(chat, opts):
 
             return web.Response(content_type='image/svg+xml', text=''.join(parts))
 
-        return web.Response(content_type='text/html', text=r'''
-            <!doctype html>
-            <title>-m stackchat web</title>
-            <link rel="stylesheet" href="/style.css" />
-
-            <p>
-                import stackchat
-            </p>
-
-            <h1>with stackchat.Client(...) as chat:</h1>
-
-            <p><a href="/se">chat.server("se") # Stack Exchange</a></p>
-            <p><a href="/so">chat.server("so") # Stack Overflow</a></p>
-            <p><a href="/mse">chat.server("mse") # Meta Stack Exchange</a></p>
-        ''')
+        return render('index.html')
 
     @get(r'/style.css')
     async def css(request):
-        return web.Response(content_type='text/css', text=r'''
-            body {
-                font-family: monospace;
-            }
-
-            * {
-                font-family: inherit;
-            }
-
-            body {
-                max-width: 800px;
-                margin: 32px;
-                padding-left: 32px;
-            }
-
-            h1 {
-                margin: 0;
-                margin-top: 16px;
-                margin-left: -32px; 
-            }
-
-            h2 {
-                margin: 0;
-                margin-top: 8px;
-                margin-left: -16px; 
-            }
-
-            h3 {
-                margin: 0;
-                margin-top: 4px;
-                margin-left: -8px; 
-            }
-
-            h4 {
-                margin: 0;
-                margin-top: 2px;
-                margin-left: -4px; 
-            }
-
-            a {
-                color: blue;
-                text-decoration: underline;
-                text-decoration-color: purple;
-            }
-
-                a:active {
-                    color: red;
-                }
-
-            input {
-                border: none;
-                background: none;
-                width: 256px;
-            }
-
-            button {
-                font-weight: bold;
-            }
-        ''')
+        return render('style.css', content_type='text/css')
 
     @get(r'/{slug:[a-z]+}')
     async def server(request):
@@ -152,21 +101,10 @@ async def main(chat, opts):
         html_info = "\n".join(
            ("<p><a href=\"%s\">server.room(%s) # %s</a></p>" % (html.escape("/%s/%s" % (slug, room.room_id)), room.room_id, html.escape(room.name))) for room in await server.rooms())
 
-        return web.Response(content_type='text/html', text=r'''
-            <!doctype html>
-            <title>-m stackchat web</title>
-            <link rel="stylesheet" href="/style.css" />
-
-            <p>
-                import stackchat
-            </p>
-
-            <h1>with stackchat.Client(...) as chat:</h1>
-
-            <h2>{html_name}</h2>
-
-            {html_info}
-        '''.format(**locals()))
+        return render('server.html', {
+            'html_name': django.utils.html.mark_safe(html_name),
+            'html_info': django.utils.html.mark_safe(html_info),
+        })
 
     @get(r'/{slug:[a-z]+}/{room_id:[0-9]+}')
     async def room(request):
@@ -180,35 +118,12 @@ async def main(chat, opts):
         html_messages = "\n".join(
             "<b><a href=\"/u/%s\">%s</a></b>: %s" % (m.owner.user_id, html.escape(m.owner.name), html.escape(m.content_text or m.content_html or m.content_markdown)) for m in messages
         )
+        return render('room.html', {
+            'html_name': django.utils.html.mark_safe(html_name),
+            'html_messages': django.utils.html.mark_safe(html_messages),
+        })
 
-        return web.Response(content_type='text/html', text=r'''
-            <!doctype html>
-            <title>-m stackchat web</title>
-            <link rel="stylesheet" href="/style.css" />
-
-            <p>
-                import stackchat<br />
-                from aitertools import alist, islice as aislice
-            </p>
-
-            <h1>with stackchat.Client(…) as chat:</h1>
-
-            <h2>{html_name}</h2>
-
-            <h3>room.send(</h3>
-
-            <form method="POST">
-                "<input name="content_markdown" placeholder="Hello, world." />"<button type="submit">) # send</button>
-            </form>
-
-            <h3>messages = await alist(aislice(room.old_messages(), 0, 5))</h3>
-
-            <pre>{html_messages}</pre>
-
-            <h3>async for message in aislice(room.new_messages(), 0, 5):</h3>
-
-            <pre>NotImplemented</pre>
-        '''.format(**locals()))
+        return web.Response('room.html')
 
     logger.info("Creating server.")
     server = await asyncio.get_event_loop().create_server(app.make_handler(), '0.0.0.0', int(os.environ.get('PORT') or 8080))
