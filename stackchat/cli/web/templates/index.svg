@@ -6,6 +6,7 @@
         stroke: #fbf2d9;
         font-size: 12px;
         font-family: Consolas, monospace;
+        white-space: pre;
     }
 </style>
 {% for line in lines %}

@@ -1,9 +1,10 @@
-from aitertools import alist, islice as aislice
+import datetime
 import textwrap
 import html
 import mimetypes
 import os.path
 
+from aitertools import alist, islice as aislice
 from aiohttp import web
 import django.template
 import django.utils.html
@@ -12,6 +13,9 @@ from ..._version import __version__
 
 
 _get_routes = []
+
+
+_init_datetime = datetime.datetime.utcnow().replace(microsecond=0)
 
 
 def _get(route_pattern):
@@ -47,16 +51,28 @@ def render(template_name, context_data={}, content_type=None):
 
 @_get(r'/')
 async def index(chat, request):
-    # handle explicit oneboxing as image with `!https://stack.chat`
-    if True or request.headers.getall('ACCEPT', [''])[0].lower().startswith('image/'):
-        s = "stack.chat version %s" % (__version__)
+    # handle explicit oneboxing as image
+    if request.headers.getall('ACCEPT', [''])[0].lower().startswith('image/'):
+        lines = [
+            f'!{request.scheme}://{request.host}',
+            f'# stack.chat version {__version__}',
+            f'# up since {_init_datetime.isoformat()}'
+        ]
 
         total_width_px = 300
         line_height_px = 18
         text_width_chars = 42
         text_height_chars = 16
 
-        lines = textwrap.wrap(s, width=text_width_chars, subsequent_indent='  ')[:text_height_chars]
+        lines = ('\n'.join(textwrap.fill(
+            line,
+            replace_whitespace=False,
+            drop_whitespace=False,
+            width=text_width_chars,
+            subsequent_indent='  '
+        ) for line in lines)).split('\n')
+        
+        lines = lines[:text_height_chars]
 
         return render('index.svg', {
             'width': total_width_px,
