@@ -8,11 +8,11 @@ import aiohttp
 import sqlalchemy.orm
 
 from .. import parse
+from .._version import __version__
+from .._util import async
 from ..parse.json import events
 from ..data import models, _seed
-from .._util import async
 from . import _request
-
 
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,9 @@ class Client:
 
         self._web_session = _HttpClientSession(
             read_timeout=20,
-            raise_for_status=True)
+            raise_for_status=True,
+            headers={'User-Agent': f'stack.chat/{__version__} (+https://stack.chat)'}
+        )
         self._request_throttle = async.Throttle(interval=0.5)
 
         self._authenticated = asyncio.ensure_future(self._authenticate(se_email, se_password))
