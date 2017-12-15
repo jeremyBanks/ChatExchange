@@ -20,6 +20,7 @@ common commands:
 import asyncio
 import getpass
 import importlib
+import inspect
 import logging
 import os
 
@@ -125,11 +126,12 @@ def main(*argv):
 
     if not no_chat:
         with Client(db_path, se_email, se_password) as chat:
-            coro = subcommand_module.main(chat, sub_opts)
-            asyncio.get_event_loop().run_until_complete(coro)
+            r = subcommand_module.main(chat, sub_opts)
     else:
-        coro = subcommand_module.main(dict(locals()), sub_opts)
-        asyncio.get_event_loop().run_until_complete(coro)
+        r = subcommand_module.main(dict(locals()), sub_opts)
+
+    if inspect.iscoroutinefunction(subcommand_module.main):
+        asyncio.get_event_loop().run_until_complete(r)
 
 
 class Filter(logging.Filter):
